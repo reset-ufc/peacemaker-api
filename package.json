@@ -1,10 +1,9 @@
 {
-  "name": "peacemaker-api-base",
+  "name": "peacemaker-api",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "API for the Peacemaker project",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -75,6 +74,9 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "engines": {
+    "node": ">=20"
   },
   "packageManager": "pnpm@9.6.0"
 }
