@@ -8,13 +8,12 @@ export class JwtAuthService {
   constructor(private jwtService: JwtService) {}
 
   login(user: User) {
-    const { id, email, name } = user;
+    const { id, displayName } = user;
     const payload: JwtPayload = {
       sub: id!,
       iat: Date.now(),
       exp: Date.now() + 1000 * 60 * 60 * 24 * 7, // 1 week
-      name,
-      email,
+      name: displayName,
     };
 
     return {

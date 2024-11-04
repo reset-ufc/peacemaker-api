@@ -26,10 +26,9 @@ export class UserService {
     // For now, we'll skip this and always return the same dummy user, regardless of the `userId`.
     return {
       id: '42195',
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-      avatar: 'https://avatars.githubusercontent.com/u/76269418?v=4',
-      githubId: '99999999',
+      displayName: 'John Doe',
+      profileUrl: 'https://avatars.githubusercontent.com/u/76269418?v=4',
+      username: 'meiazero',
     };
   }
 }

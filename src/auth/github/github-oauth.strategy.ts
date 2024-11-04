@@ -1,12 +1,18 @@
 import { AppConfig } from '@/config/interfaces/app-config';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { Profile, Strategy } from 'passport-github2';
+import {
+  Profile,
+  Strategy,
+  StrategyOptionsWithRequest,
+} from 'passport-github2';
 import { UserService } from '@/user/user.service';
 
 @Injectable()
 export class GithubOauthStrategy extends PassportStrategy(Strategy, 'github') {
+  private readonly logger = new Logger(GithubOauthStrategy.name);
+
   constructor(
     private configService: ConfigService<AppConfig>,
     private usersService: UserService,
@@ -15,8 +21,9 @@ export class GithubOauthStrategy extends PassportStrategy(Strategy, 'github') {
       clientID: configService.get<string>('auth.github.clientId'),
       clientSecret: configService.get<string>('auth.github.clientSecret'),
       callbackURL: configService.get<string>('auth.github.callbackURL'),
-      scope: ['public_profile'],
-    });
+      scope: ['repo,user:email'],
+      passReqToCallback: true,
+    } as StrategyOptionsWithRequest);
   }
 
   async validate(accessToken: string, _refreshToken: string, profile: Profile) {
@@ -33,13 +40,14 @@ export class GithubOauthStrategy extends PassportStrategy(Strategy, 'github') {
     // (e.g., creating the user property on the Request object), and the request
     // handling pipeline can continue.
 
-    const { id } = profile;
-    const user = await this.usersService.findOrCreate(id, 'github');
-    if (!user) {
-      // TODO Depending on the concrete implementation of findOrCreate(), throwing the
-      // UnauthorizedException here might not make sense...
-      throw new UnauthorizedException();
-    }
-    return user;
+    // TODO: Change this to use the user service
+    // const { id } = profile;
+    // const user = await this.usersService.findOrCreate(id, 'github');
+    // if (!user) {
+    //   // TODO Depending on the concrete implementation of findOrCreate(), throwing the
+    //   // UnauthorizedException here might not make sense...
+    //   throw new UnauthorizedException();
+    // }
+    return profile;
   }
 }

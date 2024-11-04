@@ -41,7 +41,7 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy) {
 
     // Passport assigns the value we return from this method to the Request object as `req.user`.
     // AppController#getProfile() uses this as an example.
-    const { name, email } = payload;
-    return { name, email };
+    const { name } = payload;
+    return { name };
   }
 }

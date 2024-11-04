@@ -13,7 +13,6 @@ export const jwtPayloadSchema = z.object({
   /** Expiration time, e.g. 1644229587. This property is added automatically by passport-jwt. */
   exp: z.number().optional(),
   name: z.string().optional(),
-  email: z.string().optional(),
 });
 
 export type JwtPayload = z.infer<typeof jwtPayloadSchema>;
