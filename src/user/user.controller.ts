@@ -1,4 +1,41 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
+import { UserService } from './user.service';
+import { User } from './user.model';
+
+@Controller('user')
+export class UserController {
+  constructor(private service: UserService) {}
+
+  @Get('findById/:id')
+  get(@Param('id') id: number) {
+    return this.service.findUserByGithubId(Number(id));
+  }
+
+  @Post('create')
+  create(@Body() user: User) {
+    return this.service.createUser(user);
+  }
+
+  @Put('update')
+  update(@Body() user: User) {
+    return this.service.updateUser(user);
+  }
+
+  /*@Delete('delete/:id')
+  remove(@Param('id') id: number) {
+    return this.service.remove(id);
+  }*/
+}
+
+/*import { Body, Controller, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { IsPublic } from '../auth/decorators/is-public.decorator';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -20,3 +57,4 @@ export class UserController {
     return this.userService.createUser(createUserDto);
   }
 }
+*/

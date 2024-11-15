@@ -1,9 +1,40 @@
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { User } from './user.model';
+import { Model } from 'mongoose';
 
-import { CreateUserDto } from './dto/create-user.dto';
-import { AuthProvider } from '@/auth/jwt/entities/jwt.entity';
-import { User } from './entities/user.entity';
+@Injectable()
+export class UserService {
+  constructor(@InjectModel('User') private readonly userModel: Model<User>) {}
 
+  async createUser(doc: User) {
+    const result = await new this.userModel(doc).save();
+    return result.id;
+  }
+
+  async findUserByGithubId(id: number) {
+    try {
+      const user = await this.userModel.findOne({ githubId: id }).exec();
+      if (!user) {
+        throw new Error(`Usuário com ID ${id} não encontrado.`);
+      }
+      return user;
+    } catch (error) {
+      console.error(`Erro ao buscar usuário pelo ID ${id}`, error.message);
+      throw error;
+    }
+  }
+
+  async updateUser(user: User) {
+    // ...
+  }
+}
+
+//import { CreateUserDto } from './dto/create-user.dto';
+//import { AuthProvider } from '@/auth/jwt/entities/jwt.entity';
+//import { User } from './entities/user.entity';
+
+/*
 @Injectable()
 export class UserService {
   async createUser(
@@ -32,3 +63,4 @@ export class UserService {
     };
   }
 }
+*/
