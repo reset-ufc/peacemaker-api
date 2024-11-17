@@ -2,6 +2,7 @@ import { AppConfig } from './interfaces/app-config';
 
 export default (): AppConfig => ({
   port: parseInt(process.env.PORT!) || 5000,
+  databaseUrl: process.env.DATABASE_URL!,
 
   auth: {
     jwt: {

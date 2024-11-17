@@ -1,22 +1,21 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { IsPublic } from '../auth/decorators/is-public.decorator';
-import { CreateUserDto } from './dto/create-user.dto';
+
 import { UserService } from './user.service';
+import { User } from './entities/user.entity';
 
 @ApiTags('users')
-@Controller()
+@Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private service: UserService) {}
 
-  @ApiOperation({ summary: 'Create a user' })
+  @ApiOperation({ summary: 'Get user by id' })
   @ApiResponse({
-    status: 201,
-    description: 'The user has been successfully created.',
+    status: 200,
+    description: 'The user has been successfully retrieved.',
   })
-  @IsPublic()
-  @Post('user')
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.createUser(createUserDto);
+  @Get('/:id')
+  get(@Param('id') id: string): Promise<User> {
+    return this.service.findUserByGithubId(id);
   }
 }
