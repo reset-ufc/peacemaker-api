@@ -1,18 +1,25 @@
-import { z } from 'zod';
+import mongoose from 'mongoose';
 
-export const userSchema = z.object({
-  id: z.string(),
-  nodeId: z.string(),
-  displayName: z.string(),
-  username: z.string(),
-  profileUrl: z.string(),
-  photos: z.array(
-    z.object({
-      value: z.string(),
-    }),
-  ),
-  createdAt: z.date().optional(),
-  updateAt: z.date().optional(),
+export const UserSchema = new mongoose.Schema({
+  id: String,
+  nodeId: String,
+  displayName: String,
+  username: String,
+  profileUrl: String,
+  photos: {
+    value: String,
+  },
+  createdAt: Date,
+  updateAt: Date,
 });
 
-export type User = z.infer<typeof userSchema>;
+export interface User extends mongoose.Document {
+  id: string;
+  nodeId: string;
+  displayName: string;
+  username: string;
+  profileUrl: string;
+  photos: Array<{ value: string }>;
+  createdAt: Date;
+  updateAt: Date;
+}

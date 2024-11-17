@@ -1,8 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import mongoose from 'mongoose';
-import 'dotenv/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -21,7 +19,6 @@ async function bootstrap() {
     jsonDocumentUrl: 'swagger/json',
   });
 
-  await app.listen(process.env.PORT ?? 3030);
-  console.log(process.env.PORT);
+  await app.listen(process.env.PORT! ?? 3000);
 }
 bootstrap();
