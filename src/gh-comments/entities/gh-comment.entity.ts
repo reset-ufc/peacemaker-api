@@ -75,6 +75,14 @@ export class GhComment {
     required: false,
   })
   readonly solved: boolean;
+
+  @ApiProperty()
+  @Prop({
+    type: String,
+    default: null,
+    require: false
+  })
+  readonly solution: string
 }
 
 export const GhCommentSchema = SchemaFactory.createForClass(GhComment);
