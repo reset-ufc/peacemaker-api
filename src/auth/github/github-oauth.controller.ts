@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 
 import { JwtAuthService } from '../jwt/jwt-auth.service';
 import { GithubOauthGuard } from './github-oauth.guard';
+import { User } from '@/user/entities/user.entity';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('auth')
@@ -32,22 +33,34 @@ export class GithubOauthController {
   @UseGuards(GithubOauthGuard)
   async githubAuthCallback(
     @Req() req: Request,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Res({ passthrough: true }) res: Response,
   ) {
-    // Passport automatically creates a `user` object, based on the return value of our
-    // GithubOauthStrategy#validate() method, and assigns it to the Request object as `req.user`
+    const githubUser = req.user as User;
+  
+    // Preencher campos obrigatórios se necessário
+    const userForJwt = {
+      id: githubUser.id,
+      displayName: githubUser.displayName,
+    };
 
-    const user = req.user as any;
-
-    // TODO delete
-    console.log(
-      `${this.githubAuthCallback.name}(): req.user = ${JSON.stringify(user, null, 4)}`,
-    );
-
-    const jwt = this.jwtAuthService.login(user);
-    // res.cookie('jwt', accessToken);
-
-    return { access_token: jwt.accessToken };
+    const jwt = this.jwtAuthService.login(userForJwt);
+  
+    res.cookie('access_token', jwt.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // HTTPS em produção
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 1 semana
+    });
+  
+    return {
+      message: 'Login successful',
+      user: {
+        id: githubUser.id,
+        username: githubUser.username,
+        displayName: githubUser.displayName,
+        profileUrl: githubUser.profileUrl,
+        photos: githubUser.photos,
+      },
+    };
   }
+
 }

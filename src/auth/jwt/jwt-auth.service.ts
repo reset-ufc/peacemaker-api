@@ -7,17 +7,19 @@ import { JwtPayload } from './entities/jwt.entity';
 export class JwtAuthService {
   constructor(private jwtService: JwtService) {}
 
-  login(user: User) {
+  login(user: Pick<User, 'id' | 'displayName'>) {
     const { id, displayName } = user;
+  
     const payload: JwtPayload = {
-      sub: id!,
+      sub: id,
       iat: Date.now(),
-      exp: Date.now() + 1000 * 60 * 60 * 24 * 7, // 1 week
+      exp: Date.now() + 1000 * 60 * 60 * 24 * 7, // 1 semana
       name: displayName,
     };
-
+  
     return {
       accessToken: this.jwtService.sign(payload),
     };
   }
+  
 }

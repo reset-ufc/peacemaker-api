@@ -27,27 +27,21 @@ export class GithubOauthStrategy extends PassportStrategy(Strategy, 'github') {
   }
 
   async validate(accessToken: string, _refreshToken: string, profile: Profile) {
-    // For each strategy, Passport will call the verify function (implemented with this
-    // `validate()` method in @nestjs/passport) using an appropriate strategy-specific set of
-    // parameters. For the passport-github strategy Passport expects a `validate()` method with
-    // the following signature:
-    //   `validate(accessToken: string, refreshToken: string, profile: Profile): any`
-    // As you can see from this, `validate()` receives the access token and optional refresh
-    // token, as well as profile which contains the authenticated user's GitHub profile.
-    // We can pass these information to find or create the user in our system.
-    // The Passport library expects this method to return a full user if the validation
-    // succeeds, or a null if it fails. When returning a user, Passport will complete its tasks
-    // (e.g., creating the user property on the Request object), and the request
-    // handling pipeline can continue.
-
-    // TODO: Change this to use the user service
-    // const { id } = profile;
-    // const user = await this.usersService.findOrCreate(id, 'github');
-    // if (!user) {
-    //   // TODO Depending on the concrete implementation of findOrCreate(), throwing the
-    //   // UnauthorizedException here might not make sense...
-    //   throw new UnauthorizedException();
-    // }
-    return profile;
+    const user = {
+      id: profile.id,
+      nodeId: profile.nodeId,
+      displayName: profile.displayName || profile.username || '',
+      username: profile.username,
+      profileUrl: profile.profileUrl,
+      photos: profile.photos?.map((photo) => ({ value: photo.value })) || [],
+      createdAt: new Date(), // Opcional, pode ser ajustado
+      updateAt: new Date(), // Opcional, pode ser ajustado
+      accessToken, // Incluímos o token de acesso para uso posterior
+    };
+  
+    // Validação com o schema do Zod para garantir consistência
+    //const validatedUser = userSchema.parse(user);
+  
+    return user;
   }
 }
