@@ -80,9 +80,9 @@ export class GhComment {
   @Prop({
     type: String,
     default: null,
-    require: false
+    require: false,
   })
-  readonly solution: string
+  readonly solution: string;
 }
 
 export const GhCommentSchema = SchemaFactory.createForClass(GhComment);
