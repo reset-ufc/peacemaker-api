@@ -7,6 +7,7 @@ import { UserController } from './user/user.controller';
 import { AppService } from './app.service';
 import { GithubOauthModule } from './auth/github/github-oauth.module';
 import { UserModule } from './user/user.module';
+import { GhCommentsModule } from './gh-comments/gh-comments.module';
 import appConfig from './config/app.config';
 
 @Module({
@@ -25,6 +26,7 @@ import appConfig from './config/app.config';
     }),
     GithubOauthModule,
     UserModule,
+    GhCommentsModule,
   ],
   controllers: [AppController, UserController],
   providers: [AppService],
