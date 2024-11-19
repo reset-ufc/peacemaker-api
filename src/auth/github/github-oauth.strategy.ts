@@ -1,5 +1,5 @@
 import { AppConfig } from '@/config/interfaces/app-config';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import {
@@ -11,8 +11,6 @@ import { UserService } from '@/user/user.service';
 
 @Injectable()
 export class GithubOauthStrategy extends PassportStrategy(Strategy, 'github') {
-  private readonly logger = new Logger(GithubOauthStrategy.name);
-
   constructor(
     private configService: ConfigService<AppConfig>,
     private usersService: UserService,
@@ -29,19 +27,13 @@ export class GithubOauthStrategy extends PassportStrategy(Strategy, 'github') {
   async validate(accessToken: string, _refreshToken: string, profile: Profile) {
     const user = {
       id: profile.id,
-      nodeId: profile.nodeId,
-      displayName: profile.displayName || profile.username || '',
+      displayName: profile.displayName,
       username: profile.username,
       profileUrl: profile.profileUrl,
-      photos: profile.photos?.map((photo) => ({ value: photo.value })) || [],
-      createdAt: new Date(), // Opcional, pode ser ajustado
-      updateAt: new Date(), // Opcional, pode ser ajustado
-      accessToken, // Incluímos o token de acesso para uso posterior
+      photos: profile.photos?.[0].value,
+      accessToken,
     };
-  
-    // Validação com o schema do Zod para garantir consistência
-    //const validatedUser = userSchema.parse(user);
-  
+
     return user;
   }
 }
