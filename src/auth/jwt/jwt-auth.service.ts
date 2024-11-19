@@ -7,19 +7,18 @@ import { JwtPayload } from './entities/jwt.entity';
 export class JwtAuthService {
   constructor(private jwtService: JwtService) {}
 
-  login(user: Pick<User, 'id' | 'displayName'>) {
-    const { id, displayName } = user;
-  
+  login(user: Pick<User, 'github_id' | 'name'>) {
+    const { github_id: id, name } = user;
+
     const payload: JwtPayload = {
-      sub: id,
+      sub: String(id),
       iat: Date.now(),
       exp: Date.now() + 1000 * 60 * 60 * 24 * 7, // 1 semana
-      name: displayName,
+      name,
     };
-  
+
     return {
       accessToken: this.jwtService.sign(payload),
     };
   }
-  
 }
