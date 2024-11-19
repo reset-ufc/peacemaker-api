@@ -5,6 +5,7 @@ import { JwtAuthService } from '../jwt/jwt-auth.service';
 import { GithubOauthGuard } from './github-oauth.guard';
 import { User } from '@/user/entities/user.entity';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Profile } from 'passport-github2';
 
 @ApiTags('auth')
 @Controller('auth/github')
@@ -35,22 +36,22 @@ export class GithubOauthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const githubUser = req.user as User;
-  
+    const githubUser = req.user as Profile;
+
     // Preencher campos obrigatórios se necessário
     const userForJwt = {
-      id: githubUser.id,
-      displayName: githubUser.displayName,
+      github_id: Number.parseInt(githubUser.id, 10),
+      name: githubUser.displayName,
     };
 
     const jwt = this.jwtAuthService.login(userForJwt);
-  
+
     res.cookie('access_token', jwt.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production', // HTTPS em produção
       maxAge: 1000 * 60 * 60 * 24 * 7, // 1 semana
     });
-  
+
     return {
       message: 'Login successful',
       user: {
@@ -62,5 +63,4 @@ export class GithubOauthController {
       },
     };
   }
-
 }

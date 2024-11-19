@@ -1,25 +1,64 @@
+import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
+import { ApiProperty } from '@nestjs/swagger';
 
-export const UserSchema = new mongoose.Schema({
-  id: String,
-  nodeId: String,
-  displayName: String,
-  username: String,
-  profileUrl: String,
-  photos: {
-    value: String,
+export type UserDocument = mongoose.Document;
+
+@Schema({
+  toJSON: {
+    getters: true,
   },
-  createdAt: Date,
-  updateAt: Date,
-});
+  timestamps: true,
+})
+export class User {
+  @ApiProperty()
+  @Prop({
+    type: String,
+    required: true,
+  })
+  github_id: number;
 
-export interface User extends mongoose.Document {
-  id: string;
-  nodeId: string;
-  displayName: string;
-  username: string;
-  profileUrl: string;
-  photos: Array<{ value: string }>;
-  createdAt: Date;
-  updateAt: Date;
+  @ApiProperty()
+  @Prop({
+    type: String,
+    required: true,
+  })
+  node_id: string;
+
+  @ApiProperty()
+  @Prop({
+    type: String,
+    required: true,
+  })
+  login: string;
+
+  @ApiProperty()
+  @Prop({
+    type: String,
+    required: true,
+  })
+  avatar_url: string;
+
+  @ApiProperty()
+  @Prop({
+    type: Boolean,
+    required: true,
+  })
+  site_admin: boolean;
+
+  @ApiProperty()
+  @Prop({
+    type: String,
+    required: true,
+  })
+  name: string;
+
+  @ApiProperty()
+  @Prop({
+    type: String,
+    required: true,
+  })
+  email: string;
 }
+
+export const UserSchema = SchemaFactory.createForClass(User);
