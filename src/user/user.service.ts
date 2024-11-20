@@ -8,11 +8,17 @@ import { InjectModel } from '@nestjs/mongoose';
 export class UserService {
   constructor(@InjectModel('User') private userModel: Model<User>) {}
 
-  async findUserByGithubId(id: string): Promise<User> {
-    const user = await this.userModel.findOne({ githubId: id }).exec();
-    if (!user) {
-      throw new Error(`Usuário com ID ${id} não encontrado.`);
+  async createUser(createUserDto: User) {
+    const userExists = await this.userModel.findOne({
+      github_id: createUserDto.github_id,
+    });
+
+    if (userExists) {
+      return userExists.toJSON();
     }
-    return user;
+
+    const userCreated = await this.userModel.create(createUserDto);
+
+    return userCreated.toObject();
   }
 }

@@ -1,16 +1,28 @@
-import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { catchError, firstValueFrom } from 'rxjs';
 
-import { JwtAuthService } from '../jwt/jwt-auth.service';
-import { GithubOauthGuard } from './github-oauth.guard';
-import { User } from '@/user/entities/user.entity';
+import { JwtAuthService } from '@/auth/jwt/jwt-auth.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Profile } from 'passport-github2';
+import { HttpService } from '@nestjs/axios';
+import axios, { AxiosError } from 'axios';
+import { ConfigService } from '@nestjs/config';
+import { AppConfig } from '@/config/interfaces/app-config';
+import {
+  AccessTokenGithubResponse,
+  UserGithubResponse,
+} from './entities/github-response.entity';
+import { UserService } from '@/user/user.service';
 
 @ApiTags('auth')
 @Controller('auth/github')
 export class GithubOauthController {
-  constructor(private jwtAuthService: JwtAuthService) {}
+  constructor(
+    private readonly jwtAuthService: JwtAuthService,
+    private readonly httpService: HttpService,
+    private readonly userService: UserService,
+    private readonly configService: ConfigService<AppConfig>,
+  ) {}
 
   @ApiOperation({ summary: 'Authenticate user with GitHub' })
   @ApiResponse({
@@ -18,11 +30,14 @@ export class GithubOauthController {
     description: 'Redirect to GitHub OAuth login page.',
   })
   @Get()
-  @UseGuards(GithubOauthGuard)
-  async githubAuth() {
-    // With `@UseGuards(GithubOauthGuard)` we are using an AuthGuard that @nestjs/passport
-    // automatically provisioned for us when we extended the passport-github2 strategy.
-    // The Guard initiates the passport-github flow.
+  async githubAuth(@Res({ passthrough: true }) response: Response) {
+    const githubClientId = this.configService.get<string>(
+      'auth.github.clientId',
+    );
+
+    return response.redirect(
+      `https://github.com/login/oauth/authorize?client_id=${githubClientId}&response_type=code`,
+    );
   }
 
   @ApiOperation({ summary: 'Authenticate user with GitHub' })
@@ -31,36 +46,103 @@ export class GithubOauthController {
     description: 'The user has been successfully authenticated.',
   })
   @Get('callback')
-  @UseGuards(GithubOauthGuard)
   async githubAuthCallback(
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+    @Query('code') code: string,
   ) {
-    const githubUser = req.user as Profile;
+    const responseAccessToken = await this.getGithubAccessToken(code);
 
-    // Preencher campos obrigatórios se necessário
-    const userForJwt = {
-      github_id: Number.parseInt(githubUser.id, 10),
-      name: githubUser.displayName,
-    };
+    try {
+      const responseUser = await this.getGithubUser(
+        responseAccessToken.access_token,
+      );
 
-    const jwt = this.jwtAuthService.login(userForJwt);
+      const userCreated = await this.userService.createUser({
+        avatar_url: responseUser.avatar_url,
+        email: responseUser.email,
+        github_id: responseUser.id,
+        login: responseUser.login,
+        name: responseUser.name,
+        node_id: responseUser.node_id,
+        site_admin: responseUser.site_admin,
+        github_token: responseAccessToken.access_token,
+      });
 
-    res.cookie('access_token', jwt.accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // HTTPS em produção
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 1 semana
-    });
+      const { accessToken } = this.jwtAuthService.login(userCreated);
 
-    return {
-      message: 'Login successful',
-      user: {
-        id: githubUser.id,
-        username: githubUser.username,
-        displayName: githubUser.displayName,
-        profileUrl: githubUser.profileUrl,
-        photos: githubUser.photos,
-      },
-    };
+      return response.status(200).json({ access_token: accessToken });
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return response.status(error.response?.status || 500).json({
+          message: error.response?.data || 'Axios Error',
+          status: error.response?.status,
+        });
+      }
+
+      return response.status(500).json({
+        message: 'An unexpected error occurred',
+      });
+    }
+  }
+
+  private async getGithubAccessToken(code: string) {
+    const githubClientId = this.configService.get<string>(
+      'auth.github.clientId',
+    );
+    const githubSecret = this.configService.get<string>(
+      'auth.github.clientSecret',
+    );
+    const githubState = this.configService.get<string>('auth.github.scope');
+
+    const response = (await this.httpService.axiosRef
+      .post('https://github.com/login/oauth/access_token', {
+        client_id: githubClientId,
+        client_secret: githubSecret,
+        code,
+        state: githubState,
+      })
+      .then((response) => response.data)
+      .then((response) => {
+        const pairs: Array<string> = response.split('&');
+
+        const responseObject: AccessTokenGithubResponse = {
+          access_token: '',
+          expires_in: 0,
+          refresh_token: '',
+          refresh_token_expires_in: 0,
+          scope: '',
+          token_type: '',
+        };
+
+        pairs.forEach((pair) => {
+          const [key, value] = pair.split('=');
+          if (key in responseObject) {
+            (responseObject[
+              key as keyof typeof responseObject
+            ] as unknown as string) = value;
+          }
+        });
+
+        return responseObject;
+      })) as unknown as AccessTokenGithubResponse;
+
+    return response;
+  }
+
+  private async getGithubUser(
+    accessToken: string,
+  ): Promise<UserGithubResponse> {
+    const responseUser = (await this.httpService.axiosRef
+      .get('https://api.github.com/user', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+      .then((responseUser) => {
+        return responseUser.data;
+      })) as unknown as UserGithubResponse;
+
+    return responseUser;
   }
 }

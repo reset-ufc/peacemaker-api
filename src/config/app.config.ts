@@ -14,6 +14,7 @@ export default (): AppConfig => ({
       clientId: process.env.GITHUB_OAUTH_CLIENT_ID!,
       clientSecret: process.env.GITHUB_OAUTH_CLIENT_SECRET!,
       callbackURL: process.env.GITHUB_OAUTH_CALLBACK_URL!,
+      scope: process.env.GITHUB_OAUTH_SCOPE!,
     },
   },
 });
