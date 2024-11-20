@@ -1,11 +1,11 @@
-import { Controller, Get, Query, Req, Res } from '@nestjs/common';
-import { Request, Response } from 'express';
-
-import { JwtAuthService } from '@/auth/jwt/jwt-auth.service';
+import { Controller, Get, Query, Res } from '@nestjs/common';
+import { Response } from 'express';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { HttpService } from '@nestjs/axios';
-import axios from 'axios';
 import { ConfigService } from '@nestjs/config';
+import axios from 'axios';
+
+import { JwtAuthService } from '@/auth/jwt/jwt-auth.service';
 import { AppConfig } from '@/config/interfaces/app-config';
 import {
   AccessTokenGithubResponse,
@@ -46,7 +46,6 @@ export class GithubOauthController {
   })
   @Get('callback')
   async githubAuthCallback(
-    @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
     @Query('code') code: string,
   ) {
