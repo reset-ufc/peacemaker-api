@@ -1,11 +1,10 @@
 import { Controller, Get, Query, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { catchError, firstValueFrom } from 'rxjs';
 
 import { JwtAuthService } from '@/auth/jwt/jwt-auth.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { HttpService } from '@nestjs/axios';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import { ConfigService } from '@nestjs/config';
 import { AppConfig } from '@/config/interfaces/app-config';
 import {
