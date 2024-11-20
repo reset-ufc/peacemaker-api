@@ -30,15 +30,6 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy) {
     // `payload` is that what JwtAuthService#login() has created and what thereafter
     // GithubOauthController#githubAuthCallback() has saved as cookie named "jwt".
 
-    // TODO delete
-    console.log(
-      `${JwtAuthStrategy.name}#${this.validate.name}(): payload = ${JSON.stringify(
-        payload,
-        null,
-        4,
-      )}`,
-    );
-
     // Passport assigns the value we return from this method to the Request object as `req.user`.
     // AppController#getProfile() uses this as an example.
     const { name } = payload;
