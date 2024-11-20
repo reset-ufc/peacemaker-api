@@ -5,20 +5,17 @@ import { JwtPayload } from './entities/jwt.entity';
 
 @Injectable()
 export class JwtAuthService {
-  constructor(private jwtService: JwtService) {}
+  constructor(private readonly jwtService: JwtService) {}
 
-  login(user: Pick<User, 'github_id' | 'name'>) {
-    const { github_id: id, name } = user;
-
+  login(user: User) {
     const payload: JwtPayload = {
-      sub: String(id),
+      sub: String(user.github_id),
       iat: Date.now(),
       exp: Date.now() + 1000 * 60 * 60 * 24 * 7, // 1 semana
-      name,
+      name: user.name,
     };
 
-    return {
-      accessToken: this.jwtService.sign(payload),
-    };
+    const accessToken = this.jwtService.sign(payload);
+    return { accessToken };
   }
 }

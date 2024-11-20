@@ -56,9 +56,16 @@ export class User {
   @ApiProperty()
   @Prop({
     type: String,
-    required: true,
+    required: false,
   })
   email: string;
+
+  @ApiProperty()
+  @Prop({
+    type: String,
+    required: false,
+  })
+  github_token: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

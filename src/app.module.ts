@@ -9,6 +9,8 @@ import { GithubOauthModule } from './auth/github/github-oauth.module';
 import { UserModule } from './user/user.module';
 import { GhCommentsModule } from './gh-comments/gh-comments.module';
 import appConfig from './config/app.config';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { GlobalErrorInterceptor } from './error/global-error.interceptor';
 
 @Module({
   imports: [
@@ -29,6 +31,12 @@ import appConfig from './config/app.config';
     GhCommentsModule,
   ],
   controllers: [AppController, UserController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: GlobalErrorInterceptor,
+    },
+  ],
 })
 export class AppModule {}

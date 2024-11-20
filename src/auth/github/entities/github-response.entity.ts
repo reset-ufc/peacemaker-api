@@ -1,4 +1,4 @@
-export type GithubResponse = {
+export type UserGithubResponse = {
   login: string;
   id: number;
   node_id: string;
@@ -33,4 +33,13 @@ export type GithubResponse = {
   following: number;
   created_at: string;
   updated_at: string;
+};
+
+export type AccessTokenGithubResponse = {
+  access_token: string;
+  expires_in: number;
+  refresh_token: string;
+  refresh_token_expires_in: number;
+  scope: string;
+  token_type: string;
 };

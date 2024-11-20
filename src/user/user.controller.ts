@@ -1,21 +1,21 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { UserService } from './user.service';
-import { User } from './entities/user.entity';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @ApiTags('users')
 @Controller('user')
 export class UserController {
   constructor(private service: UserService) {}
 
-  @ApiOperation({ summary: 'Get user by id' })
+  @ApiOperation({ summary: 'Create user' })
   @ApiResponse({
     status: 200,
-    description: 'The user has been successfully retrieved.',
+    description: 'The user has been successfully created.',
   })
-  @Get('/:id')
-  get(@Param('id') id: string): Promise<User> {
-    return this.service.findUserByGithubId(id);
+  @Post()
+  async create(@Body() user: CreateUserDto) {
+    return this.service.createUser(user);
   }
 }
