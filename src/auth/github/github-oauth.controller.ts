@@ -69,12 +69,12 @@ export class GithubOauthController {
 
       const { accessToken } = this.jwtAuthService.login(userCreated);
 
-      return response
+      response
         .status(200)
         .json({ access_token: accessToken.toString() });
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        return response.status(error.response?.status || 500).json({
+        response.status(error.response?.status || 500).json({
           message: error.response?.data || 'Axios Error',
           status: error.response?.status,
         });
