@@ -70,7 +70,9 @@ export class GithubOauthController {
 
       const { accessToken } = this.jwtAuthService.login(userCreated);
 
-      return response.status(200).json({ access_token: accessToken });
+      return response
+        .status(200)
+        .json({ access_token: accessToken.toString() });
     } catch (error) {
       if (axios.isAxiosError(error)) {
         return response.status(error.response?.status || 500).json({
@@ -94,54 +96,42 @@ export class GithubOauthController {
     );
     const githubState = this.configService.get<string>('auth.github.scope');
 
-    const response = (await this.httpService.axiosRef
-      .post('https://github.com/login/oauth/access_token', {
+    const response = await this.httpService.axiosRef.post(
+      'https://github.com/login/oauth/access_token',
+      {
         client_id: githubClientId,
         client_secret: githubSecret,
         code,
         state: githubState,
-      })
-      .then((response) => response.data)
-      .then((response) => {
-        const pairs: Array<string> = response.split('&');
+      },
+      {
+        headers: {
+          Accept: 'application/json',
+        },
+      },
+    );
 
-        const responseObject: AccessTokenGithubResponse = {
-          access_token: '',
-          expires_in: 0,
-          refresh_token: '',
-          refresh_token_expires_in: 0,
-          scope: '',
-          token_type: '',
-        };
+    const responseData =
+      (await response.data) as unknown as AccessTokenGithubResponse;
 
-        pairs.forEach((pair) => {
-          const [key, value] = pair.split('=');
-          if (key in responseObject) {
-            (responseObject[
-              key as keyof typeof responseObject
-            ] as unknown as string) = value;
-          }
-        });
-
-        return responseObject;
-      })) as unknown as AccessTokenGithubResponse;
-
-    return response;
+    return responseData;
   }
 
   private async getGithubUser(
     accessToken: string,
   ): Promise<UserGithubResponse> {
-    const responseUser = (await this.httpService.axiosRef
-      .get('https://api.github.com/user', {
+    const responseUser = await this.httpService.axiosRef.get(
+      'https://api.github.com/user',
+      {
         headers: {
+          Accept: 'application/json',
           Authorization: `Bearer ${accessToken}`,
         },
-      })
-      .then((responseUser) => {
-        return responseUser.data;
-      })) as unknown as UserGithubResponse;
+      },
+    );
+    const responseUserData =
+      (await responseUser.data) as unknown as UserGithubResponse;
 
-    return responseUser;
+    return responseUserData;
   }
 }
