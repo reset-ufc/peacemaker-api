@@ -8,17 +8,19 @@ import { AppService } from './app.service';
 import { GithubOauthModule } from './auth/github/github-oauth.module';
 import { UserModule } from './user/user.module';
 import { GhCommentsModule } from './gh-comments/gh-comments.module';
+import { AnalyticsCommentsModule } from './analytics-comments/analytics-comments.module';
 import appConfig from './config/app.config';
 
 @Module({
   imports: [
+    AnalyticsCommentsModule,
     ConfigModule.forRoot({
       isGlobal: true,
       load: [appConfig],
       envFilePath: '.env',
     }),
     MongooseModule.forRootAsync({
-      imports: [ConfigModule],
+      imports: [ConfigModule, AnalyticsCommentsModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         uri: configService.get<string>('databaseUrl'),
