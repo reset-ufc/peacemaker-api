@@ -34,9 +34,11 @@ export class GithubOauthController {
       'auth.github.clientId',
     );
 
-    return response.redirect(
-      `https://github.com/login/oauth/authorize?client_id=${githubClientId}&response_type=code`,
-    );
+    //return response.redirect(
+    //  `https://github.com/login/oauth/authorize?client_id=${githubClientId}&response_type=code`,
+    //);
+    const redirectUrl = `https://github.com/login/oauth/authorize?client_id=${githubClientId}&response_type=code`;
+    response.json({ url: redirectUrl });
   }
 
   @ApiOperation({ summary: 'Authenticate user with GitHub' })
