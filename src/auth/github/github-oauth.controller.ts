@@ -13,7 +13,7 @@ import {
 } from './entities/github-response.entity';
 import { UserService } from '@/user/user.service';
 
-@ApiTags('auth')
+@ApiTags('Auth')
 @Controller('auth/github')
 export class GithubOauthController {
   constructor(
