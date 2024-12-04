@@ -7,7 +7,7 @@ import { User } from '@/user/entities/user.entity';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Profile } from 'passport-github2';
 
-@ApiTags('auth')
+@ApiTags('Auth')
 @Controller('auth/github')
 export class GithubOauthController {
   constructor(private jwtAuthService: JwtAuthService) {}
