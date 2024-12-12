@@ -2,10 +2,19 @@ import { User } from '@/user/entities/user.entity';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './entities/jwt.entity';
+import { UnauthorizedException } from '@nestjs/common';
 
 @Injectable()
 export class JwtAuthService {
   constructor(private readonly jwtService: JwtService) {}
+
+  verifyToken(token: string): JwtPayload {
+    try {
+      return this.jwtService.verify<JwtPayload>(token);
+    } catch (error) {
+      throw new UnauthorizedException('Invalid token');
+    }
+  }
 
   login(user: User) {
     const payload: JwtPayload = {

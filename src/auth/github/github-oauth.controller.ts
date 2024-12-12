@@ -1,10 +1,10 @@
-import { Controller, Get, Query, Res } from '@nestjs/common';
-import { Response } from 'express';
+import { Controller, Get, Query, Res, Req } from '@nestjs/common';
+import { Response, Request } from 'express';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
-
+import * as crypto from 'crypto';
 import { JwtAuthService } from '@/auth/jwt/jwt-auth.service';
 import { AppConfig } from '@/config/interfaces/app-config';
 import {
@@ -23,6 +23,32 @@ export class GithubOauthController {
     private readonly configService: ConfigService<AppConfig>,
   ) {}
 
+  @ApiOperation({ summary: 'Validate user token' })
+  @ApiResponse({ status: 200, description: 'Token is valid.' })
+  @ApiResponse({ status: 401, description: 'Invalid or missing token.' })
+  @Get('validate')
+  async validateToken(@Req() req: Request, @Res() res: Response) {
+    try {
+
+      const token = req.headers.authorization?.split(" ")[1];
+      console.log(token)
+
+      if (!token) {
+        return res.status(401).json({ authenticated: false, message: 'Token não encontrado.' });
+      }
+
+      const isValid = this.jwtAuthService.verifyToken(token); // Substitua pelo seu serviço
+      if (!isValid) {
+        return res.status(401).json({ authenticated: false, message: 'Token inválido.' });
+      }
+
+      return res.status(200).json({ authenticated: true, message: 'Usuário autenticado.' });
+    } catch (error) {
+      console.error('Erro durante validação:', error);
+      return res.status(500).json({ error: 'Erro interno no servidor.' });
+    }
+  }
+
   @ApiOperation({ summary: 'Authenticate user with GitHub' })
   @ApiResponse({
     status: 302,
@@ -33,11 +59,12 @@ export class GithubOauthController {
     const githubClientId = this.configService.get<string>(
       'auth.github.clientId',
     );
+    const state = crypto.randomBytes(16).toString('hex');
 
     //return response.redirect(
     //  `https://github.com/login/oauth/authorize?client_id=${githubClientId}&response_type=code`,
     //);
-    const redirectUrl = `https://github.com/login/oauth/authorize?client_id=${githubClientId}&response_type=code`;
+    const redirectUrl = `https://github.com/login/oauth/authorize?client_id=${githubClientId}&response_type=code&state=${state}`;
     response.json({ url: redirectUrl });
   }
 
