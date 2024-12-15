@@ -140,6 +140,6 @@ export class GhCommentsService {
       ])
       .exec();
 
-    return likes[0] || { totalLikes: 0, totalDislikes: 0 };
+    return { likes };
   }
 }
