@@ -19,14 +19,14 @@ export type UserGithubResponse = {
   user_view_type: string;
   site_admin: boolean;
   name: string;
-  company: any;
+  company: string;
   blog: string;
   location: string;
-  email: any;
+  email: string;
   hireable: boolean;
   bio: string;
   twitter_username: string;
-  notification_email: any;
+  notification_email: string;
   public_repos: number;
   public_gists: number;
   followers: number;

@@ -11,7 +11,8 @@ export class JwtAuthService {
   verifyToken(token: string): JwtPayload {
     try {
       return this.jwtService.verify<JwtPayload>(token);
-    } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error: any) {
       throw new UnauthorizedException('Invalid token');
     }
   }

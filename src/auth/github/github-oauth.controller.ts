@@ -29,20 +29,25 @@ export class GithubOauthController {
   @Get('validate')
   async validateToken(@Req() req: Request, @Res() res: Response) {
     try {
-
-      const token = req.headers.authorization?.split(" ")[1];
-      console.log(token)
+      const token = req.headers.authorization?.split(' ')[1];
+      console.log(token);
 
       if (!token) {
-        return res.status(401).json({ authenticated: false, message: 'Token não encontrado.' });
+        return res
+          .status(401)
+          .json({ authenticated: false, message: 'Token não encontrado.' });
       }
 
       const isValid = this.jwtAuthService.verifyToken(token); // Substitua pelo seu serviço
       if (!isValid) {
-        return res.status(401).json({ authenticated: false, message: 'Token inválido.' });
+        return res
+          .status(401)
+          .json({ authenticated: false, message: 'Token inválido.' });
       }
 
-      return res.status(200).json({ authenticated: true, message: 'Usuário autenticado.' });
+      return res
+        .status(200)
+        .json({ authenticated: true, message: 'Usuário autenticado.' });
     } catch (error) {
       console.error('Erro durante validação:', error);
       return res.status(500).json({ error: 'Erro interno no servidor.' });
@@ -98,12 +103,11 @@ export class GithubOauthController {
 
       const { accessToken } = this.jwtAuthService.login(userCreated);
 
-      response
-        .status(200)
-        .json({ access_token: accessToken.toString() });
+      response.status(200).json({ access_token: accessToken.toString() });
     } catch (error) {
       if (axios.isAxiosError(error)) {
         response.status(error.response?.status || 500).json({
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           message: error.response?.data || 'Axios Error',
           status: error.response?.status,
         });
