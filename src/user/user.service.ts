@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 
-import { User } from './entities/user.entity';
-import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UserService {
@@ -20,5 +20,23 @@ export class UserService {
     const userCreated = await this.userModel.create(createUserDto);
 
     return userCreated.toObject();
+  }
+
+  async getUser(githubId: string) {
+    return this.userModel.findOne({ github_id: githubId });
+  }
+
+  async getUsers() {
+    return this.userModel.find();
+  }
+
+  async profile(githubId: string) {
+    const user = await this.userModel.findOne({ github_id: githubId });
+
+    if (!user) {
+      return null;
+    }
+
+    return user.toJSON();
   }
 }

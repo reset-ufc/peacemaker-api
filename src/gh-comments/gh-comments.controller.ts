@@ -1,20 +1,20 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  Res,
+  Get,
   HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Res,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 
-import { GhCommentsService } from './gh-comments.service';
 import { CreateGhCommentDto } from './dto/create-gh-comment.dto';
 import { UpdateGhCommentDto } from './dto/update-gh-comment.dto';
+import { GhCommentsService } from './gh-comments.service';
 
 @ApiTags('Github Comments')
 @Controller('gh-comments')
@@ -35,7 +35,6 @@ export class GhCommentsController {
       await this.ghCommentsService.create(createGhCommentDto);
 
     return response.status(HttpStatus.CREATED).json({
-      message: 'Gh-comment created successfully',
       id: createdGhComment._id,
     });
   }
@@ -50,7 +49,6 @@ export class GhCommentsController {
     const ghComments = await this.ghCommentsService.findAll();
 
     return response.status(HttpStatus.OK).json({
-      message: 'Gh-comments retrieved successfully',
       comments: ghComments,
     });
   }
@@ -65,7 +63,6 @@ export class GhCommentsController {
     const ghComment = await this.ghCommentsService.findOne(id);
 
     return response.status(HttpStatus.OK).json({
-      message: 'Gh-comment retrieved successfully',
       comments: ghComment,
     });
   }
@@ -87,7 +84,6 @@ export class GhCommentsController {
     );
 
     return response.status(HttpStatus.OK).json({
-      message: 'Gh-comment updated successfully',
       id: updatedGhComment?._id,
     });
   }
@@ -102,7 +98,6 @@ export class GhCommentsController {
     const deletedGhComment = await this.ghCommentsService.remove(id);
 
     return response.status(HttpStatus.OK).json({
-      message: 'Gh-comment deleted successfully',
       id: deletedGhComment?._id,
     });
   }
@@ -115,8 +110,15 @@ export class GhCommentsController {
       'The average score of comments has been successfully retrieved.',
   })
   @Get(':repository_id/average-score')
-  async getAverageScore(@Param('repository_id') repo_id: string) {
-    return this.ghCommentsService.getAverageScore(repo_id);
+  async getAverageScore(
+    @Res() response: Response,
+    @Param('repository_id') repo_id: string,
+  ) {
+    const averageScore = await this.ghCommentsService.getAverageScore(repo_id);
+
+    return response.status(HttpStatus.OK).json({
+      avarege_score: averageScore,
+    });
   }
 
   @ApiOperation({ summary: 'Get median score of comments' })
@@ -126,8 +128,15 @@ export class GhCommentsController {
       'The median score of comments has been successfully retrieved.',
   })
   @Get(':repository_id/median-score/')
-  async getMedianScore(@Param('repository_id') repo_id: string) {
-    return this.ghCommentsService.getMedianScore(repo_id);
+  async getMedianScore(
+    @Res() response: Response,
+    @Param('repository_id') repo_id: string,
+  ) {
+    const medianScore = this.ghCommentsService.getMedianScore(repo_id);
+
+    return response.status(HttpStatus.OK).json({
+      median_score: medianScore,
+    });
   }
 
   @ApiOperation({ summary: 'Get total comments of repository' })
@@ -137,8 +146,16 @@ export class GhCommentsController {
       'The total comments of repository has been successfully retrieved.',
   })
   @Get(':repository_id/total-comments/')
-  async getTotalComments(@Param('repository_id') repo_id: string) {
-    return this.ghCommentsService.getTotalComments(repo_id);
+  async getTotalComments(
+    @Res() response: Response,
+    @Param('repository_id') repo_id: string,
+  ) {
+    const totalComments =
+      await this.ghCommentsService.getTotalComments(repo_id);
+
+    return response.status(HttpStatus.OK).json({
+      total_comments: totalComments,
+    });
   }
 
   @ApiOperation({ summary: 'Get resolved comments of repository' })
@@ -148,8 +165,16 @@ export class GhCommentsController {
       'The resolved comments of repository has been successfully retrieved.',
   })
   @Get(':repository_id/resolved-comments/')
-  async getResolvedComments(@Param('repository_id') repo_id: string) {
-    return this.ghCommentsService.getResolvedComments(repo_id);
+  async getResolvedComments(
+    @Res() response: Response,
+    @Param('repository_id') repo_id: string,
+  ) {
+    const resolvedComments =
+      await this.ghCommentsService.getResolvedComments(repo_id);
+
+    return response.status(HttpStatus.OK).json({
+      resolved_comments: resolvedComments,
+    });
   }
 
   @ApiOperation({ summary: 'Get recent users of repository' })
@@ -159,8 +184,15 @@ export class GhCommentsController {
       'The recent users of repository has been successfully retrieved.',
   })
   @Get(':repository_id/recent-users/')
-  async getRecentUsers(@Param('repository_id') repo_id: string) {
-    return this.ghCommentsService.getRecentUsers(repo_id);
+  async getRecentUsers(
+    @Res() response: Response,
+    @Param('repository_id') repo_id: string,
+  ) {
+    const recentUsers = await this.ghCommentsService.getRecentUsers(repo_id);
+
+    return response.status(HttpStatus.OK).json({
+      recent_users: recentUsers,
+    });
   }
 
   @ApiOperation({ summary: 'Get developers count of repository' })
@@ -170,8 +202,16 @@ export class GhCommentsController {
       'The developers count of repository has been successfully retrieved.',
   })
   @Get(':repository_id/developers-count/')
-  async getDevelopersCount(@Param('repository_id') repo_id: string) {
-    return this.ghCommentsService.getDevelopersCount(repo_id);
+  async getDevelopersCount(
+    @Res() response: Response,
+    @Param('repository_id') repo_id: string,
+  ) {
+    const developersCount =
+      await this.ghCommentsService.getDevelopersCount(repo_id);
+
+    return response.status(HttpStatus.OK).json({
+      developers_count: developersCount,
+    });
   }
 
   @ApiOperation({ summary: 'Get classification count of repository' })
@@ -181,8 +221,16 @@ export class GhCommentsController {
       'The classification count of repository has been successfully retrieved.',
   })
   @Get(':repository_id/classification-count/')
-  async getClassificationCount(@Param('repository_id') repo_id: string) {
-    return this.ghCommentsService.getClassificationCount(repo_id);
+  async getClassificationCount(
+    @Res() response: Response,
+    @Param('repository_id') repo_id: string,
+  ) {
+    const classificationCount =
+      await this.ghCommentsService.getClassificationCount(repo_id);
+
+    return response.status(HttpStatus.OK).json({
+      classification_count: classificationCount,
+    });
   }
 
   @ApiOperation({ summary: 'Get moderation types of repository' })
@@ -192,8 +240,16 @@ export class GhCommentsController {
       'The moderation types of repository has been successfully retrieved.',
   })
   @Get(':repository_id/moderation-types/')
-  async getModerationTypes(@Param('repository_id') repo_id: string) {
-    return this.ghCommentsService.getModerationTypes(repo_id);
+  async getModerationTypes(
+    @Res() response: Response,
+    @Param('repository_id') repo_id: string,
+  ) {
+    const moderationTypes =
+      await this.ghCommentsService.getModerationTypes(repo_id);
+
+    return response.status(HttpStatus.OK).json({
+      moderation_types: moderationTypes,
+    });
   }
 
   @ApiOperation({ summary: 'Get likes and dislikes insights of repository' })
@@ -203,7 +259,15 @@ export class GhCommentsController {
       'The likes and dislikes insights of repository has been successfully retrieved.',
   })
   @Get(':repository_id/likes-dislikes-insights/')
-  async getLikesDislikesInsights(@Param('repository_id') repo_id: string) {
-    return this.ghCommentsService.getLikesDislikesInsights(repo_id);
+  async getLikesDislikesInsights(
+    @Res() response: Response,
+    @Param('repository_id') repo_id: string,
+  ) {
+    const insights =
+      await this.ghCommentsService.getLikesDislikesInsights(repo_id);
+
+    return response.status(HttpStatus.OK).json({
+      insights,
+    });
   }
 }
