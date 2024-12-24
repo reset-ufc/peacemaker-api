@@ -1,17 +1,18 @@
-import { Controller, Get, Query, Res, Req } from '@nestjs/common';
-import { Response, Request } from 'express';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { HttpService } from '@nestjs/axios';
-import { ConfigService } from '@nestjs/config';
-import axios from 'axios';
-import * as crypto from 'crypto';
+import { IsPublic } from '@/auth/decorators/is-public.decorator';
 import { JwtAuthService } from '@/auth/jwt/jwt-auth.service';
 import { AppConfig } from '@/config/interfaces/app-config';
+import { UserService } from '@/user/user.service';
+import { HttpService } from '@nestjs/axios';
+import { Controller, Get, Query, Req, Res } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import axios from 'axios';
+import * as crypto from 'crypto';
+import { Request, Response } from 'express';
 import {
   AccessTokenGithubResponse,
   UserGithubResponse,
 } from './entities/github-response.entity';
-import { UserService } from '@/user/user.service';
 
 @ApiTags('Auth')
 @Controller('auth/github')
@@ -23,6 +24,7 @@ export class GithubOauthController {
     private readonly configService: ConfigService<AppConfig>,
   ) {}
 
+  @IsPublic()
   @ApiOperation({ summary: 'Validate user token' })
   @ApiResponse({ status: 200, description: 'Token is valid.' })
   @ApiResponse({ status: 401, description: 'Invalid or missing token.' })
@@ -53,7 +55,7 @@ export class GithubOauthController {
       return res.status(500).json({ error: 'Erro interno no servidor.' });
     }
   }
-
+  @IsPublic()
   @ApiOperation({ summary: 'Authenticate user with GitHub' })
   @ApiResponse({
     status: 302,
@@ -73,6 +75,7 @@ export class GithubOauthController {
     response.json({ url: redirectUrl });
   }
 
+  @IsPublic()
   @ApiOperation({ summary: 'Authenticate user with GitHub' })
   @ApiResponse({
     status: 201,
