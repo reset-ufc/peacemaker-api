@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { GhComment } from './entities/gh-comment.entity';
 import { CreateGhCommentDto } from './dto/create-gh-comment.dto';
 import { UpdateGhCommentDto } from './dto/update-gh-comment.dto';
+import { GhComment } from './entities/gh-comment.entity';
 
 @Injectable()
 export class GhCommentsService {
@@ -12,6 +12,7 @@ export class GhCommentsService {
     @InjectModel(GhComment.name)
     private readonly ghCommentModel: Model<GhComment>,
   ) {}
+
   create(createGhCommentDto: CreateGhCommentDto) {
     return this.ghCommentModel.create(createGhCommentDto);
   }

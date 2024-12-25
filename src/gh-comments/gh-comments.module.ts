@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { GhCommentsService } from './gh-comments.service';
-import { GhCommentsController } from './gh-comments.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { GhComment, GhCommentSchema } from './entities/gh-comment.entity';
+import { GhCommentsController } from './gh-comments.controller';
+import { GhCommentsService } from './gh-comments.service';
 
 @Module({
   imports: [

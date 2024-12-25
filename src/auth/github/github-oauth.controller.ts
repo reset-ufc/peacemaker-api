@@ -32,7 +32,6 @@ export class GithubOauthController {
   async validateToken(@Req() req: Request, @Res() res: Response) {
     try {
       const token = req.headers.authorization?.split(' ')[1];
-      console.log(token);
 
       if (!token) {
         return res
@@ -55,6 +54,7 @@ export class GithubOauthController {
       return res.status(500).json({ error: 'Erro interno no servidor.' });
     }
   }
+
   @IsPublic()
   @ApiOperation({ summary: 'Authenticate user with GitHub' })
   @ApiResponse({
