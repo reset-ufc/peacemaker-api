@@ -1,6 +1,4 @@
-import { CurrentUser } from '@/auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '@/auth/jwt/jwt-auth.guard';
-import { User } from '@/user/entities/user.entity';
 import { Controller, Get, Res, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -24,12 +22,11 @@ export class GhRepositoriesController {
     description: 'The repositories have been successfully retrieved.',
   })
   @Get()
-  async getRepositories(@Res() response: Response, @CurrentUser() user: User) {
+  async getRepositories(@Res() response: Response) {
     const repositories = await this.ghRepositoriesService.getRepositories();
 
     return response.status(200).json({
       repositories,
-      user,
     });
   }
 }
