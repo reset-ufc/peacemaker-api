@@ -21,8 +21,10 @@ export class JwtAuthService {
       sub: String(user.github_id),
       iat: Date.now(),
       exp: Date.now() + 1000 * 60 * 60 * 24 * 7, // 1 semana
-      name: user.name,
-      github_id: user.github_id,
+      user: {
+        name: user.name,
+        github_id: user.github_id,
+      },
     };
 
     const accessToken = this.jwtService.sign(payload);
