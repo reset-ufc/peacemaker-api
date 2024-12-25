@@ -12,8 +12,10 @@ export const jwtPayloadSchema = z.object({
   iat: z.number().optional(),
   /** Expiration time, e.g. 1644229587. This property is added automatically by passport-jwt. */
   exp: z.number().optional(),
-  name: z.string().optional(),
-  github_id: z.number().optional(),
+  user: z.object({
+    name: z.string().optional(),
+    github_id: z.number().optional(),
+  }),
 });
 
 export type JwtPayload = z.infer<typeof jwtPayloadSchema>;
