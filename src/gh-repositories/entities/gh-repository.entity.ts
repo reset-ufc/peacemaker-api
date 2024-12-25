@@ -11,13 +11,36 @@ export type GhRepositoryDocument = mongoose.Document;
   timestamps: true,
 })
 export class GhRepository {
-  @Prop({ required: true })
-  @ApiProperty({ example: 'github-api' })
-  name: string;
-
-  @Prop({ required: true })
-  @ApiProperty({ example: 'https://github.com/github-api/github-api' })
-  url: string;
+  @ApiProperty()
+  @Prop({
+    type: String,
+    required: true,
+  })
+  readonly repository_id: string;
+  @ApiProperty()
+  @Prop({
+    type: String,
+    required: true,
+  })
+  readonly repository_name: string;
+  @ApiProperty()
+  @Prop({
+    type: String,
+    required: true,
+  })
+  readonly repository_full_name: string;
+  @ApiProperty()
+  @Prop({
+    type: String,
+    required: true,
+  })
+  readonly permissions: string;
+  @ApiProperty()
+  @Prop({
+    type: String,
+    required: true,
+  })
+  readonly user_id: string;
 }
 
 export const GhRepositorySchema = SchemaFactory.createForClass(GhRepository);
