@@ -1,6 +1,16 @@
 export interface AppConfig {
-  port: number;
-  databaseUrl: string;
+  server: {
+    url: string;
+    port: number;
+  };
+
+  database: {
+    name?: string;
+    user?: string;
+    password?: string;
+    host?: string;
+    url: string;
+  };
 
   auth: {
     jwt: {
@@ -17,6 +27,7 @@ export interface AppConfig {
 
   'auth.jwt.secret'?: string;
   'auth.jwt.expiresInSeconds'?: number;
+
   'auth.github.clientId'?: string;
   'auth.github.clientSecret'?: string;
   'auth.github.callbackURL'?: string;
