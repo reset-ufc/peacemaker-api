@@ -25,7 +25,7 @@ import { UserModule } from './user/user.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('databaseUrl'),
+        uri: configService.get<string>('database.url'),
       }),
     }),
     GithubOauthModule,
