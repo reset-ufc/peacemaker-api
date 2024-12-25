@@ -58,8 +58,8 @@ export class GithubOauthController {
   @IsPublic()
   @ApiOperation({ summary: 'Authenticate user with GitHub' })
   @ApiResponse({
-    status: 302,
-    description: 'Redirect to GitHub OAuth login page.',
+    status: 200,
+    description: 'Return the redirect url to GitHub OAuth login page.',
   })
   @Get()
   async githubAuth(@Res({ passthrough: true }) response: Response) {
@@ -78,7 +78,7 @@ export class GithubOauthController {
   @IsPublic()
   @ApiOperation({ summary: 'Authenticate user with GitHub' })
   @ApiResponse({
-    status: 201,
+    status: 200,
     description: 'The user has been successfully authenticated.',
   })
   @Get('callback')
