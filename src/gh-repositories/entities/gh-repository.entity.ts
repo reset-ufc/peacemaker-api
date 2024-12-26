@@ -31,10 +31,10 @@ export class GhRepository {
   readonly repository_full_name: string;
   @ApiProperty()
   @Prop({
-    type: String,
+    type: Object,
     required: true,
   })
-  readonly permissions: string;
+  readonly permissions: object;
   @ApiProperty()
   @Prop({
     type: String,
