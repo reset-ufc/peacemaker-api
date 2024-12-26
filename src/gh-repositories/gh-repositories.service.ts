@@ -32,6 +32,16 @@ export class GhRepositoriesService {
 
     const remoteRepositories = await this.findRemoteRepositories(github_id);
 
+    remoteRepositories.repositories.map(async (repository) => {
+      await this.ghRepositoryModel.create({
+        repository_id: String(repository.repository_id),
+        repository_name: repository.repository_name,
+        repository_full_name: repository.repository_full_name,
+        permissions: repository.permissions,
+        user_id: github_id,
+      });
+    });
+
     return {
       repositories: remoteRepositories.repositories,
       from: remoteRepositories.from,
