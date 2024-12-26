@@ -1,17 +1,15 @@
-import { Controller, Get, Query, Res, Req } from '@nestjs/common';
-import { Response, Request } from 'express';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { HttpService } from '@nestjs/axios';
-import { ConfigService } from '@nestjs/config';
-import axios from 'axios';
-import * as crypto from 'crypto';
+import { IsPublic } from '@/auth/decorators/is-public.decorator';
 import { JwtAuthService } from '@/auth/jwt/jwt-auth.service';
 import { AppConfig } from '@/config/interfaces/app-config';
-import {
-  AccessTokenGithubResponse,
-  UserGithubResponse,
-} from './entities/github-response.entity';
 import { UserService } from '@/user/user.service';
+import { HttpService } from '@nestjs/axios';
+import { Controller, Get, Query, Req, Res } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import axios from 'axios';
+import * as crypto from 'crypto';
+import { Request, Response } from 'express';
+import { AccessTokenGithubResponse, UserGithubResponse } from './entities/github-response.entity';
 
 @ApiTags('Auth')
 @Controller('auth/github')
@@ -23,6 +21,7 @@ export class GithubOauthController {
     private readonly configService: ConfigService<AppConfig>,
   ) {}
 
+  @IsPublic()
   @ApiOperation({ summary: 'Validate user token' })
   @ApiResponse({ status: 200, description: 'Token is valid.' })
   @ApiResponse({ status: 401, description: 'Invalid or missing token.' })
@@ -30,40 +29,32 @@ export class GithubOauthController {
   async validateToken(@Req() req: Request, @Res() res: Response) {
     try {
       const token = req.headers.authorization?.split(' ')[1];
-      console.log(token);
 
       if (!token) {
-        return res
-          .status(401)
-          .json({ authenticated: false, message: 'Token não encontrado.' });
+        return res.status(401).json({ authenticated: false, message: 'Token não encontrado.' });
       }
 
       const isValid = this.jwtAuthService.verifyToken(token); // Substitua pelo seu serviço
       if (!isValid) {
-        return res
-          .status(401)
-          .json({ authenticated: false, message: 'Token inválido.' });
+        return res.status(401).json({ authenticated: false, message: 'Token inválido.' });
       }
 
-      return res
-        .status(200)
-        .json({ authenticated: true, message: 'Usuário autenticado.' });
+      return res.status(200).json({ authenticated: true, message: 'Usuário autenticado.' });
     } catch (error) {
       console.error('Erro durante validação:', error);
       return res.status(500).json({ error: 'Erro interno no servidor.' });
     }
   }
 
+  @IsPublic()
   @ApiOperation({ summary: 'Authenticate user with GitHub' })
   @ApiResponse({
-    status: 302,
-    description: 'Redirect to GitHub OAuth login page.',
+    status: 200,
+    description: 'Return the redirect url to GitHub OAuth login page.',
   })
   @Get()
   async githubAuth(@Res({ passthrough: true }) response: Response) {
-    const githubClientId = this.configService.get<string>(
-      'auth.github.clientId',
-    );
+    const githubClientId = this.configService.get<string>('auth.github.clientId');
     const state = crypto.randomBytes(16).toString('hex');
 
     //return response.redirect(
@@ -73,9 +64,11 @@ export class GithubOauthController {
     response.json({ url: redirectUrl });
   }
 
+  // TODO: fix Error [ERR_HTTP_HEADERS_SENT]: Cannot set headers after they are sent to the client
+  @IsPublic()
   @ApiOperation({ summary: 'Authenticate user with GitHub' })
   @ApiResponse({
-    status: 201,
+    status: 200,
     description: 'The user has been successfully authenticated.',
   })
   @Get('callback')
@@ -85,10 +78,19 @@ export class GithubOauthController {
   ) {
     const responseAccessToken = await this.getGithubAccessToken(code);
 
+    const responseUser = await this.getGithubUser(responseAccessToken.access_token);
+
     try {
-      const responseUser = await this.getGithubUser(
-        responseAccessToken.access_token,
-      );
+      const userExists = await this.userService.getUser(String(responseUser.id));
+
+      if (userExists) {
+        const userUpdated = await this.userService.updateUser(String(userExists.github_id), {
+          github_token: responseAccessToken.access_token,
+        });
+
+        const { accessToken } = this.jwtAuthService.login(userUpdated!);
+        response.status(200).json({ access_token: accessToken.toString() });
+      }
 
       const userCreated = await this.userService.createUser({
         avatar_url: responseUser.avatar_url,
@@ -102,7 +104,6 @@ export class GithubOauthController {
       });
 
       const { accessToken } = this.jwtAuthService.login(userCreated);
-
       response.status(200).json({ access_token: accessToken.toString() });
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -120,12 +121,8 @@ export class GithubOauthController {
   }
 
   private async getGithubAccessToken(code: string) {
-    const githubClientId = this.configService.get<string>(
-      'auth.github.clientId',
-    );
-    const githubSecret = this.configService.get<string>(
-      'auth.github.clientSecret',
-    );
+    const githubClientId = this.configService.get<string>('auth.github.clientId');
+    const githubSecret = this.configService.get<string>('auth.github.clientSecret');
     const githubState = this.configService.get<string>('auth.github.scope');
 
     const response = await this.httpService.axiosRef.post(
@@ -143,26 +140,19 @@ export class GithubOauthController {
       },
     );
 
-    const responseData =
-      (await response.data) as unknown as AccessTokenGithubResponse;
+    const responseData = (await response.data) as unknown as AccessTokenGithubResponse;
 
     return responseData;
   }
 
-  private async getGithubUser(
-    accessToken: string,
-  ): Promise<UserGithubResponse> {
-    const responseUser = await this.httpService.axiosRef.get(
-      'https://api.github.com/user',
-      {
-        headers: {
-          Accept: 'application/json',
-          Authorization: `Bearer ${accessToken}`,
-        },
+  private async getGithubUser(accessToken: string): Promise<UserGithubResponse> {
+    const responseUser = await this.httpService.axiosRef.get('https://api.github.com/user', {
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${accessToken}`,
       },
-    );
-    const responseUserData =
-      (await responseUser.data) as unknown as UserGithubResponse;
+    });
+    const responseUserData = (await responseUser.data) as unknown as UserGithubResponse;
 
     return responseUserData;
   }

@@ -24,8 +24,7 @@ export class GlobalErrorInterceptor implements NestInterceptor {
             () =>
               new HttpException(
                 {
-                  statusCode:
-                    error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
+                  statusCode: error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
                   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                   message: error.response?.data || 'Erro na requisição externa',
                   error: 'Axios Error',

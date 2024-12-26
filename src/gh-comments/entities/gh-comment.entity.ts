@@ -1,6 +1,6 @@
-import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
-import mongoose from 'mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
+import mongoose from 'mongoose';
 
 export type GhCommentDocument = mongoose.Document;
 

@@ -1,8 +1,9 @@
-import { Body, Controller, HttpStatus, Param, Post, Res } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, HttpStatus, Res } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 
-import { CreateUserDto } from './dto/create-user.dto';
+import { CurrentUser } from '@/auth/decorators/current-user.decorator';
+import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 
 @ApiTags('Users')
@@ -10,50 +11,41 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private service: UserService) {}
 
-  @ApiOperation({ summary: 'Create user' })
-  @ApiResponse({
-    status: 201,
-    description: 'The user has been successfully created.',
-  })
-  @Post()
-  async create(@Res() response: Response, @Body() user: CreateUserDto) {
-    const createdUser = await this.service.createUser(user);
+  // @IsPublic()
+  // @ApiOperation({ summary: 'Create user' })
+  // @ApiResponse({
+  //   status: 201,
+  //   description: 'The user has been successfully created.',
+  // })
+  // @Post()
+  // async create(@Res() response: Response, @Body() user: CreateUserDto) {
+  //   const createdUser = await this.service.createUser(user);
 
-    return response.status(HttpStatus.CREATED).json({
-      user: createdUser._id,
-    });
-  }
+  //   return response.status(HttpStatus.CREATED).json({
+  //     user: createdUser._id,
+  //   });
+  // }
 
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get user profile' })
   @ApiResponse({
     status: 200,
     description: 'The user profile has been successfully retrieved.',
   })
-  @Post('profile')
-  async profile(
-    @Res() response: Response,
-    @Param('githubId') githubId: string,
-  ) {
-    const user = await this.service.profile(githubId);
+  @Get('profile')
+  async profile(@Res() response: Response, @CurrentUser() user: User) {
+    const userData = await this.service.profile(String(user.github_id));
+
+    const profile = {
+      name: userData?.name,
+      email: userData?.email,
+      github_id: userData?.github_id,
+      avatar_url: userData?.avatar_url,
+      username: userData?.login,
+    };
 
     return response.status(HttpStatus.OK).json({
-      github_id: user?.github_id,
-      name: user?.name,
-      avatar_url: user?.avatar_url,
-    });
-  }
-
-  @ApiOperation({ summary: 'Get all users' })
-  @ApiResponse({
-    status: 200,
-    description: 'All users have been successfully retrieved.',
-  })
-  @Post('all')
-  async getAll(@Res() response: Response) {
-    const users = await this.service.getUsers();
-
-    return response.status(HttpStatus.OK).json({
-      users,
+      profile,
     });
   }
 }

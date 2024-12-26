@@ -1,6 +1,7 @@
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -17,10 +18,13 @@ async function bootstrap() {
     },
   });
 
+  const configService = app.get(ConfigService);
+
   const config = new DocumentBuilder()
     .setTitle('Peacemaker API')
     .setDescription('Moderation GithubBot API')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
 
   const documentFactory = () => SwaggerModule.createDocument(app, config);
@@ -29,7 +33,9 @@ async function bootstrap() {
     jsonDocumentUrl: 'swagger/json',
   });
 
-  await app.listen(process.env.PORT! ?? 3333);
+  const port = configService.get<number>('server.port') as number;
+
+  await app.listen(port);
 }
 
 bootstrap();
