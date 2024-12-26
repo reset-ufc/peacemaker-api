@@ -51,11 +51,14 @@ export class GhRepositoriesService {
   async findLocalRepositories(github_id: string) {
     const repositories = await this.ghRepositoryModel
       .find({
-        github_id,
+        user_id: github_id,
       })
       .exec();
 
-    return { repositories, from: 'local mongodb' };
+    return {
+      repositories: repositories.map((repository) => repository.toJSON()),
+      from: 'local mongodb',
+    };
   }
 
   async findRemoteRepositories(github_id: string) {
