@@ -49,7 +49,7 @@ export class GhCommentsService {
 
     const median = scores.length % 2 !== 0 ? scores[mid] : (scores[mid - 1] + scores[mid]) / 2;
 
-    return { medianScore: median };
+    return median;
   }
 
   async getTotalComments(repository_id: string) {
@@ -57,7 +57,7 @@ export class GhCommentsService {
       .countDocuments({ repo_id: repository_id })
       .exec();
 
-    return { totalComments };
+    return totalComments;
   }
 
   async getResolvedComments(repository_id: string) {
@@ -65,7 +65,7 @@ export class GhCommentsService {
       .countDocuments({ repo_id: repository_id, resolved: true })
       .exec();
 
-    return { resolvedComments: resolvedCount };
+    return resolvedCount;
   }
 
   async getRecentUsers(repository_id: string) {
@@ -97,7 +97,7 @@ export class GhCommentsService {
       ])
       .exec();
 
-    return { classificationCount: classifications };
+    return classifications;
   }
 
   async getModerationTypes(repository_id: string) {
@@ -108,7 +108,7 @@ export class GhCommentsService {
       ])
       .exec();
 
-    return { moderationTypes: moderationCounts };
+    return moderationCounts;
   }
 
   async getLikesDislikesInsights(repository_id: string) {
@@ -125,6 +125,6 @@ export class GhCommentsService {
       ])
       .exec();
 
-    return { likes };
+    return likes;
   }
 }
