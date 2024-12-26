@@ -17,8 +17,7 @@ export default (): AppConfig => ({
   auth: {
     jwt: {
       secret: process.env.JWT_SECRET!,
-      expiresInSeconds:
-        parseInt(process.env.JWT_EXPIRATION_TIME_SECONDS!) || 900,
+      expiresInSeconds: parseInt(process.env.JWT_EXPIRATION_TIME_SECONDS!) || 900,
     },
     github: {
       clientId: process.env.GITHUB_OAUTH_CLIENT_ID!,

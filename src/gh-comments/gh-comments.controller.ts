@@ -1,20 +1,5 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpStatus,
-  Param,
-  Patch,
-  Post,
-  Res,
-} from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Res } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 
 import { CreateGhCommentDto } from './dto/create-gh-comment.dto';
@@ -33,12 +18,8 @@ export class GhCommentsController {
     description: 'The gh-comment has been successfully created.',
   })
   @Post()
-  async create(
-    @Res() response: Response,
-    @Body() createGhCommentDto: CreateGhCommentDto,
-  ) {
-    const createdGhComment =
-      await this.ghCommentsService.create(createGhCommentDto);
+  async create(@Res() response: Response, @Body() createGhCommentDto: CreateGhCommentDto) {
+    const createdGhComment = await this.ghCommentsService.create(createGhCommentDto);
 
     return response.status(HttpStatus.CREATED).json({
       id: createdGhComment._id,
@@ -84,10 +65,7 @@ export class GhCommentsController {
     @Param('id') id: string,
     @Body() updateGhCommentDto: UpdateGhCommentDto,
   ) {
-    const updatedGhComment = await this.ghCommentsService.update(
-      id,
-      updateGhCommentDto,
-    );
+    const updatedGhComment = await this.ghCommentsService.update(id, updateGhCommentDto);
 
     return response.status(HttpStatus.OK).json({
       id: updatedGhComment?._id,
@@ -281,29 +259,19 @@ export class GhCommentsController {
   @ApiOperation({ summary: 'Analytics of a repository' })
   @ApiResponse({
     status: 200,
-    description:
-      'The analytics of a repository has been successfully retrieved.',
+    description: 'The analytics of a repository has been successfully retrieved.',
   })
   @Get(':repository_id/analytics/')
-  async getAnalytics(
-    @Res() response: Response,
-    @Param('repository_id') repo_id: string,
-  ) {
+  async getAnalytics(@Res() response: Response, @Param('repository_id') repo_id: string) {
     const averageScore = await this.ghCommentsService.getAverageScore(repo_id);
     const medianScore = this.ghCommentsService.getMedianScore(repo_id);
-    const totalComments =
-      await this.ghCommentsService.getTotalComments(repo_id);
-    const resolvedComments =
-      await this.ghCommentsService.getResolvedComments(repo_id);
+    const totalComments = await this.ghCommentsService.getTotalComments(repo_id);
+    const resolvedComments = await this.ghCommentsService.getResolvedComments(repo_id);
     const recentUsers = await this.ghCommentsService.getRecentUsers(repo_id);
-    const developersCount =
-      await this.ghCommentsService.getDevelopersCount(repo_id);
-    const classificationCount =
-      await this.ghCommentsService.getClassificationCount(repo_id);
-    const moderationTypes =
-      await this.ghCommentsService.getModerationTypes(repo_id);
-    const likesDislikesInsights =
-      await this.ghCommentsService.getLikesDislikesInsights(repo_id);
+    const developersCount = await this.ghCommentsService.getDevelopersCount(repo_id);
+    const classificationCount = await this.ghCommentsService.getClassificationCount(repo_id);
+    const moderationTypes = await this.ghCommentsService.getModerationTypes(repo_id);
+    const likesDislikesInsights = await this.ghCommentsService.getLikesDislikesInsights(repo_id);
 
     return response.status(HttpStatus.OK).json({
       average_score: averageScore,

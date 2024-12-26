@@ -52,14 +52,11 @@ export class GhRepositoriesService {
     const user = await this.userService.getUser(github_id);
     const githubToken = user?.github_token;
 
-    const response = await this.httpService.axiosRef.get(
-      'https://api.github.com/user/repos',
-      {
-        headers: {
-          Authorization: `Bearer ${githubToken}`,
-        },
+    const response = await this.httpService.axiosRef.get('https://api.github.com/user/repos', {
+      headers: {
+        Authorization: `Bearer ${githubToken}`,
       },
-    );
+    });
 
     const repositoriesFiltered = Array.isArray(response.data)
       ? // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access

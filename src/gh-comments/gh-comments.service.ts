@@ -26,9 +26,7 @@ export class GhCommentsService {
   }
 
   update(id: string, updateGhCommentDto: UpdateGhCommentDto) {
-    return this.ghCommentModel
-      .findOneAndUpdate({ _id: id }, updateGhCommentDto)
-      .exec();
+    return this.ghCommentModel.findOneAndUpdate({ _id: id }, updateGhCommentDto).exec();
   }
 
   remove(id: string) {
@@ -36,32 +34,20 @@ export class GhCommentsService {
   }
 
   async getAverageScore(repository_id: string) {
-    const comments = await this.ghCommentModel
-      .find({ repo_id: repository_id })
-      .exec();
+    const comments = await this.ghCommentModel.find({ repo_id: repository_id }).exec();
 
-    const totalScore = comments.reduce(
-      (sum, comment) => sum + comment.toxicity_score,
-      0,
-    );
+    const totalScore = comments.reduce((sum, comment) => sum + comment.toxicity_score, 0);
 
     return totalScore / comments.length;
   }
 
   async getMedianScore(repository_id: string) {
-    const comments = await this.ghCommentModel
-      .find({ repo_id: repository_id })
-      .exec();
-    const scores = comments
-      .map((comment) => comment.toxicity_score)
-      .sort((a, b) => a - b);
+    const comments = await this.ghCommentModel.find({ repo_id: repository_id }).exec();
+    const scores = comments.map((comment) => comment.toxicity_score).sort((a, b) => a - b);
 
     const mid = Math.floor(scores.length / 2);
 
-    const median =
-      scores.length % 2 !== 0
-        ? scores[mid]
-        : (scores[mid - 1] + scores[mid]) / 2;
+    const median = scores.length % 2 !== 0 ? scores[mid] : (scores[mid - 1] + scores[mid]) / 2;
 
     return { medianScore: median };
   }
@@ -90,9 +76,7 @@ export class GhCommentsService {
       .lean()
       .exec();
 
-    const recentUsers = [
-      ...new Set(recentComments.map((comment) => comment.github_id)),
-    ];
+    const recentUsers = [...new Set(recentComments.map((comment) => comment.github_id))];
 
     return recentUsers;
   }
