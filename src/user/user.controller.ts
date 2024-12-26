@@ -1,4 +1,4 @@
-import { Controller, HttpStatus, Post, Res } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Res } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -37,9 +37,17 @@ export class UserController {
     status: 200,
     description: 'The user profile has been successfully retrieved.',
   })
-  @Post('profile')
+  @Get('profile')
   async profile(@Res() response: Response, @CurrentUser() user: User) {
-    const profile = await this.service.profile(String(user.github_id));
+    const userData = await this.service.profile(String(user.github_id));
+
+    const profile = {
+      name: userData?.name,
+      email: userData?.email,
+      github_id: userData?.github_id,
+      avatar_url: userData?.avatar_url,
+      username: userData?.login,
+    };
 
     return response.status(HttpStatus.OK).json({
       profile,
