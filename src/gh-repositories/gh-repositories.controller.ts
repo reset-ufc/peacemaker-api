@@ -23,7 +23,8 @@ export class GhRepositoriesController {
     const repositories = await this.ghRepositoriesService.getRepositories(String(user.github_id));
 
     return response.status(200).json({
-      repositories,
+      repositories: repositories.repositories,
+      from: repositories.from,
     });
   }
 
@@ -40,7 +41,8 @@ export class GhRepositoriesController {
     );
 
     return response.status(200).json({
-      repositories,
+      repositories: repositories.repositories,
+      from: repositories.from,
     });
   }
 
@@ -57,7 +59,8 @@ export class GhRepositoriesController {
     );
 
     return response.status(200).json({
-      repositories,
+      repositories: repositories.repositories,
+      from: repositories.from,
     });
   }
 }
