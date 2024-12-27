@@ -89,6 +89,15 @@ export class GithubOauthController {
         });
 
         const { accessToken } = this.jwtAuthService.login(userUpdated!);
+
+        response.cookie('access_token', accessToken.toString(), {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'strict',
+          maxAge: 3600 * 24 * 7, // 7 days
+          path: '/',
+        });
+
         response.status(200).json({ access_token: accessToken.toString() });
       }
 
@@ -104,6 +113,15 @@ export class GithubOauthController {
       });
 
       const { accessToken } = this.jwtAuthService.login(userCreated);
+
+      response.cookie('access_token', accessToken.toString(), {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        maxAge: 3600 * 24 * 7, // 7 days
+        path: '/',
+      });
+
       response.status(200).json({ access_token: accessToken.toString() });
     } catch (error) {
       if (axios.isAxiosError(error)) {
