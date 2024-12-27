@@ -6,15 +6,10 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: {
-      origin: [
-        'http://127.0.0.1:5500',
-        'http://localhost:5173',
-        'http://localhost:3000',
-        'https://github.com',
-        'chrome-extension://ldogapjphnaepacaglhfaeljngppmcmh',
-      ],
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      origin: '*',
+      methods: '*',
       credentials: true,
+      maxAge: 3600, // 1 hour
     },
   });
 
