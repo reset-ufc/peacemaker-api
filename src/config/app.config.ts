@@ -2,8 +2,8 @@ import { AppConfig } from './interfaces/app-config';
 
 export default (): AppConfig => ({
   server: {
-    url: process.env.API_SERVER_URL!,
-    port: parseInt(process.env.API_PORT!),
+    url: process.env.NEST_API_SERVER_URL!,
+    port: parseInt(process.env.NEST_API_PORT!),
   },
 
   database: {
@@ -11,13 +11,14 @@ export default (): AppConfig => ({
     user: process.env.DATABASE_USER,
     password: process.env.DATABASE_PASSWORD,
     host: process.env.DATABASE_HOST,
-    url: process.env.DATABASE_URL!,
+    url: process.env.MONGODB_URI!,
   },
 
   auth: {
     jwt: {
       secret: process.env.JWT_SECRET!,
-      expiresInSeconds: parseInt(process.env.JWT_EXPIRATION_TIME_SECONDS!) || 900,
+      expiresInSeconds:
+        parseInt(process.env.JWT_EXPIRATION_TIME_SECONDS!) || 900,
     },
     github: {
       clientId: process.env.GITHUB_OAUTH_CLIENT_ID!,

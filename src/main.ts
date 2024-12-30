@@ -1,36 +1,38 @@
+import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { CoreModule } from './core/core.module';
 
 async function bootstrap() {
+  /**
+   * Create a new NestJS application instance using the AppModule
+   * Enable CORS with the following settings:
+   *   - Allow any origin to access the application
+   *   - Allow credentials (cookies, authentication headers) to be sent with requests
+   *   - Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
+   */
   const app = await NestFactory.create(AppModule, {
     cors: {
       origin: '*',
-      methods: '*',
       credentials: true,
-      maxAge: 3600, // 1 hour
+      methods: '*',
     },
   });
 
+  // Use a global validation pipe to automatically validate incoming requests
+  app.useGlobalPipes(new ValidationPipe());
+
+  app.setGlobalPrefix('api');
+
+  // Configure Swagger
+  CoreModule.configureSwagger(app);
+
+  // Get the ConfigService instance to access configuration variables
   const configService = app.get(ConfigService);
 
-  const config = new DocumentBuilder()
-    .setTitle('Peacemaker API')
-    .setDescription('Moderation GithubBot API')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
-
-  const documentFactory = () => SwaggerModule.createDocument(app, config);
-
-  SwaggerModule.setup('swagger', app, documentFactory, {
-    jsonDocumentUrl: 'swagger/json',
-  });
-
-  const port = configService.get<number>('server.port') as number;
-
-  await app.listen(port);
+  // Start the application and listen on the port specified in the configuration
+  await app.listen(configService.get<number>('server.port') as number);
 }
 
 bootstrap();

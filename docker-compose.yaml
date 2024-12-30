@@ -1,0 +1,20 @@
+services:
+  database:
+    image: bitnami/mongodb
+    container_name: peacemaker-mongodb
+    environment:
+      - MONGO_INITDB_DATABASE=peacemaker
+      - MONGO_INITDB_ROOT_USERNAME=ghbot
+      - MONGO_INITDB_ROOT_PASSWORD=my-secure-password
+    volumes:
+      - mongodb_data:/bitnami/mongodb
+    ports:
+      - 27017:27017
+    restart: always
+
+volumes:
+  mongodb_data:
+
+networks:
+  default:
+    name: peacemaker-network

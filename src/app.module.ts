@@ -1,44 +1,51 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
+import { ConfigSetupModule } from './config/configure.module';
+import { CoreModule } from './core/core.module';
 
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { GithubOauthModule } from './auth/github/github-oauth.module';
-import { JwtAuthGuard } from './auth/jwt/jwt-auth.guard';
-import appConfig from './config/app.config';
-import { GlobalErrorInterceptor } from './error/global-error.interceptor';
-import { GhCommentsModule } from './gh-comments/gh-comments.module';
-import { GhRepositoriesModule } from './gh-repositories/gh-repositories.module';
-import { UserController } from './user/user.controller';
-import { UserModule } from './user/user.module';
+import { Module, ValidationPipe } from '@nestjs/common';
+import { APP_GUARD, APP_PIPE } from '@nestjs/core';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { AnalyticsModule } from './modules/analytics/analytic.module';
+import { AnalyticsController } from './modules/analytics/analytics.controller';
+import { JwtAuthModule } from './modules/auth/jwt/jwt-auth.module';
+import { GithubController } from './modules/auth/oauth/github/github.controller';
+import { GithubModule } from './modules/auth/oauth/github/github.module';
+import { ClassificationController } from './modules/classification/classification.controller';
+import { ClassificationModule } from './modules/classification/classification.module';
+import { CommentController } from './modules/comment/comment.controller';
+import { CommentModule } from './modules/comment/comment.module';
+import { RepositoryController } from './modules/repository/repository.controller';
+import { RepositoryModule } from './modules/repository/repository.module';
+import { SuggestionController } from './modules/suggestion/suggestion.controller';
+import { SuggestionModule } from './modules/suggestion/suggestion.module';
+import { UserController } from './modules/user/user.controller';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      load: [appConfig],
-      envFilePath: '.env',
-    }),
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('database.url'),
-      }),
-    }),
-    GithubOauthModule,
+    ConfigSetupModule,
+    CoreModule,
     UserModule,
-    GhCommentsModule,
-    GhRepositoriesModule,
+    GithubModule,
+    CommentModule,
+    ClassificationModule,
+    SuggestionModule,
+    RepositoryModule,
+    AnalyticsModule,
+    JwtAuthModule,
   ],
-  controllers: [AppController, UserController],
+  controllers: [
+    UserController,
+    GithubController,
+    AnalyticsController,
+    CommentController,
+    ClassificationController,
+    SuggestionController,
+    RepositoryController,
+  ],
   providers: [
-    AppService,
     {
-      provide: APP_INTERCEPTOR,
-      useClass: GlobalErrorInterceptor,
+      provide: APP_PIPE,
+      useClass: ValidationPipe,
     },
     {
       provide: APP_GUARD,
