@@ -1,6 +1,8 @@
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import * as cookieParser from 'cookie-parser';
+
 import { AppModule } from './app.module';
 import { CoreModule } from './core/core.module';
 
@@ -19,6 +21,9 @@ async function bootstrap() {
       credentials: true,
     },
   });
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  app.use(cookieParser());
 
   // Use a global validation pipe to automatically validate incoming requests
   app.useGlobalPipes(new ValidationPipe());
