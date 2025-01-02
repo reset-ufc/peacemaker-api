@@ -23,7 +23,7 @@ export class RepositoryService {
   }
 
   findAll() {
-    return this.repositoryModel.find();
+    return this.repositoryModel.find().exec();
   }
 
   findOne(repositoryId: number) {
