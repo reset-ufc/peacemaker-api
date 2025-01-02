@@ -33,8 +33,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
     return canActivatePromise.catch((error) => {
       if (error as unknown) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        throw new UnauthorizedException(error.message);
+        throw new UnauthorizedException();
       }
 
       throw new UnauthorizedException();
