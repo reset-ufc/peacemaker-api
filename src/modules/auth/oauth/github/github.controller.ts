@@ -24,7 +24,7 @@ export class GithubController {
   ) {
     const token = await this.githubService.callback(code);
 
-    response.cookie('jwt', token, {
+    response.cookie('access_token', token, {
       httpOnly: true,
       secure: true,
       sameSite: 'strict',

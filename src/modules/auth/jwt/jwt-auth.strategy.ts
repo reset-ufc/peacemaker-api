@@ -8,16 +8,16 @@ import { JwtPayload } from './entities/jwt.entity';
 
 @Injectable()
 export class JwtAuthStrategy extends PassportStrategy(Strategy) {
-  constructor(private configService: ConfigService<AppConfig>) {
+  constructor(readonly configService: ConfigService<AppConfig>) {
     super({
       // available options: https://github.com/mikenicholson/passport-jwt#configure-strategy
       jwtFromRequest: ExtractJwt.fromExtractors([
         // Users can send us the JWT token either by a bearer token in an authorization header...
         ExtractJwt.fromAuthHeaderAsBearerToken(),
-        // ... or in a cookie named "jwt"
+        // ... or in a cookie named "access_token"
         (request: Request) => {
           const cookies = request.cookies as Record<string, string>;
-          return cookies?.jwt;
+          return cookies?.access_token;
         },
       ]),
       ignoreExpiration: false,
