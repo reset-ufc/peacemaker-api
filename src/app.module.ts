@@ -7,6 +7,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { AnalyticsModule } from './modules/analytics/analytic.module';
 import { AnalyticsController } from './modules/analytics/analytics.controller';
 import { JwtAuthModule } from './modules/auth/jwt/jwt-auth.module';
+import { JwtAuthStrategy } from './modules/auth/jwt/jwt-auth.strategy';
 import { GithubController } from './modules/auth/oauth/github/github.controller';
 import { GithubModule } from './modules/auth/oauth/github/github.module';
 import { ClassificationController } from './modules/classification/classification.controller';
@@ -51,6 +52,7 @@ import { UserModule } from './modules/user/user.module';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
+    JwtAuthStrategy,
   ],
 })
 export class AppModule {}
