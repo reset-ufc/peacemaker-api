@@ -16,13 +16,12 @@ async function bootstrap() {
    */
   const app = await NestFactory.create(AppModule, {
     cors: {
-      origin: ['http://localhost:3000'],
+      origin: ['http://localhost:3000', 'https://peacemaker-front-end.fly.dev'],
       methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
       credentials: true,
     },
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   app.use(cookieParser());
 
   // Use a global validation pipe to automatically validate incoming requests
