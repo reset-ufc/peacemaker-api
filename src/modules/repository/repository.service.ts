@@ -22,12 +22,14 @@ export class RepositoryService {
     return repository.save();
   }
 
-  findAll() {
-    return this.repositoryModel.find().exec();
+  findAll(githubId: number) {
+    return this.repositoryModel.find({ user_id: githubId }).exec();
   }
 
-  findOne(repositoryId: number) {
-    return this.repositoryModel.findOne({ repository_id: repositoryId });
+  findOne(repositoryId: number, githubId: number) {
+    return this.repositoryModel
+      .findOne({ repository_id: repositoryId, user_id: githubId })
+      .exec();
   }
 
   async findRemoteRepositories(githubId: number) {
@@ -65,7 +67,25 @@ export class RepositoryService {
       }),
     );
 
-    await this.repositoryModel.insertMany(repositoriesInserted);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+    const existingRepositories = await this.findAll(user?.github_id!);
+
+    // if the user already has repositories, we don't need to insert them again
+    if (existingRepositories.length > 0) {
+      return existingRepositories;
+    }
+
+    // validate if the user has all remote repositories on local database
+    // if not, we need to insert them
+    repositoriesInserted.forEach((repository) => {
+      if (
+        !existingRepositories.find(
+          (r) => r.repository_id === repository.repository_id,
+        )
+      ) {
+        this.create(repository);
+      }
+    });
 
     return repositoriesInserted;
   }
