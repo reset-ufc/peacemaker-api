@@ -8,9 +8,8 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 
-@ApiBearerAuth()
 @ApiTags('Comments')
 @Controller('v1/comments')
 export class CommentController {
