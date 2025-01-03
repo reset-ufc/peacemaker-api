@@ -6,8 +6,8 @@ import appConfig from './app.config';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      cache: true,
       load: [appConfig],
-      envFilePath: '.env',
     }),
   ],
 })
