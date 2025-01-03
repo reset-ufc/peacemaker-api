@@ -7,19 +7,30 @@ import { AppModule } from './app.module';
 import { CoreModule } from './core/core.module';
 
 async function bootstrap() {
+  // Create a new NestJS application instance using the AppModule
+  const app = await NestFactory.create(AppModule);
+
   /**
-   * Create a new NestJS application instance using the AppModule
    * Enable CORS with the following settings:
    *   - Allow any origin to access the application
    *   - Allow credentials (cookies, authentication headers) to be sent with requests
    *   - Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
    */
-  const app = await NestFactory.create(AppModule, {
-    cors: {
-      origin: ['http://localhost:3000', 'https://peacemaker-front-end.fly.dev'],
-      methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-      credentials: true,
+  const allowlist = [
+    'http://localhost:3001',
+    'https://peacemaker-front-end.fly.dev',
+  ];
+
+  app.enableCors({
+    origin: (origin, callback) => {
+      if (!origin || allowlist.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
     },
+    credentials: true,
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   });
 
   app.use(cookieParser());
