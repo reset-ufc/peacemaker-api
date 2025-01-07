@@ -61,7 +61,7 @@ export class GithubService {
     const githubClientId = this.configService.get<string>(
       'auth.github.clientId',
     )!;
-    // Erro, GithubApp não configu
+    // Erro, GithubApp não configurado.
     // const redirectUri = this.configService.get<string>(
     //   'auth.github.callbackURL',
     // )!;
@@ -69,7 +69,6 @@ export class GithubService {
 
     const authorizationUrl = GITHUB_AUTHORIZATION_URL(
       githubClientId,
-      redirectUri,
       githubState,
     );
 
