@@ -23,9 +23,13 @@ export class RepositoryController {
     return this.repositoryService.findRemoteRepositories(user.github_id);
   }
 
-  @Get(':id')
-  getRepository(@Req() request: Request, @Param('id') id: number) {
+  @Get(':username/:repository')
+  getRepository(
+    @Req() request: Request,
+    @Param('username') username: string,
+    @Param('repository') repository: string,
+  ) {
     const user = request?.user as User;
-    return this.repositoryService.findOne(id, user.github_id);
+    return this.repositoryService.findOne(username, repository, user.github_id);
   }
 }
