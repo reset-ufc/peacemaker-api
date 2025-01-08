@@ -8,11 +8,15 @@ export type RepositoryDocument = mongoose.Document;
 export class Repository {
   @ApiProperty()
   @Prop()
-  repository_id: number;
+  repository_id: string;
 
   @ApiProperty()
   @Prop()
   repository_name: string;
+
+  @ApiProperty()
+  @Prop()
+  repository_full_name: string;
 
   @ApiProperty()
   @Prop()
