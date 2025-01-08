@@ -65,7 +65,9 @@ export class GithubService {
     // const redirectUri = this.configService.get<string>(
     //   'auth.github.callbackURL',
     // )!;
-    const githubState = this.configService.get<string>('auth.github.scope')!;
+    const githubState = encodeURIComponent(
+      this.configService.get<string>('auth.github.scope')!,
+    );
 
     const authorizationUrl = GITHUB_AUTHORIZATION_URL(
       githubClientId,
