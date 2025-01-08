@@ -20,11 +20,11 @@ export class Comment {
 
   @ApiProperty()
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Repository' })
-  repository: Repository;
+  repository_id: Repository;
 
   @ApiProperty()
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
-  user: User;
+  user_id: User;
 
   @ApiProperty()
   @Prop()
@@ -32,11 +32,11 @@ export class Comment {
 
   @ApiProperty()
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Classification' })
-  classification: Classification;
+  classification_id: Classification;
 
   @ApiProperty()
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Suggestion' })
-  suggestion: Suggestion;
+  suggestion_id: Suggestion;
 
   @ApiProperty()
   @Prop()
