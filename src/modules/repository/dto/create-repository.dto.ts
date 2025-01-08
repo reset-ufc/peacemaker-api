@@ -3,10 +3,13 @@ import { IsBoolean, IsNumber, IsObject, IsString } from 'class-validator';
 
 export class CreateRepositoryDto extends Repository {
   @IsNumber()
-  repository_id: number;
+  repository_id: string;
 
   @IsString()
   repository_name: string;
+
+  @IsString()
+  repository_full_name: string;
 
   @IsString()
   description: string;
