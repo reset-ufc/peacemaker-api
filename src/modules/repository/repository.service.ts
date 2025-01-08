@@ -1,4 +1,3 @@
-import { GITHUB_USER_REPOSITORIES_URL } from '@/config/github.containsts';
 import { UserService } from '@/modules/user/user.service';
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
@@ -26,9 +25,13 @@ export class RepositoryService {
     return this.repositoryModel.find({ user_id: githubId }).exec();
   }
 
-  findOne(repositoryId: number, githubId: number) {
+  findOne(username: string, repository: string, githubId: number) {
+    const repositoryFullName = username + '/' + repository;
     return this.repositoryModel
-      .findOne({ repository_id: repositoryId, user_id: githubId })
+      .findOne({
+        repository_full_name: repositoryFullName,
+        user_id: githubId,
+      })
       .exec();
   }
 
@@ -36,9 +39,10 @@ export class RepositoryService {
     const user = await this.userService.findOneByGithubId(githubId);
 
     const response = await this.httpService.axiosRef
-      .get(GITHUB_USER_REPOSITORIES_URL(), {
+      .get('https://api.github.com/user/repos', {
         headers: {
           Authorization: `Bearer ${user?.github_token}`,
+          Accept: 'application/vnd.github.v3+json',
         },
       })
       .then(
@@ -52,8 +56,9 @@ export class RepositoryService {
 
     const repositoriesInserted: Repository[] = repositoriesFiltered.map(
       (repository: GithubRepositoryResponse) => ({
-        repository_id: repository.id,
+        repository_id: String(repository.id),
         repository_name: repository.name,
+        repository_full_name: repository.full_name,
         description: repository.description,
         github_html_url: repository.html_url,
         is_private: repository.private,
