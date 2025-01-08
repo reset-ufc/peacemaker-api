@@ -16,12 +16,10 @@ export function setupSwagger(app: INestApplication): void {
   const documentFactory = () =>
     SwaggerModule.createDocument(app, config.build());
 
-  if (process.env.NODE_ENV === 'development') {
-    SwaggerModule.setup('docs', app, documentFactory, {
-      jsonDocumentUrl: 'docs/openapi.json',
-      swaggerOptions: {
-        persistAuthorization: true,
-      },
-    });
-  }
+  SwaggerModule.setup('docs', app, documentFactory, {
+    jsonDocumentUrl: 'docs/openapi.json',
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  });
 }
