@@ -19,7 +19,7 @@ async function bootstrap() {
   const allowlist = [
     'http://localhost:3001',
     'https://peacemaker-front-end.fly.dev',
-    'chrome-extension://ldogapjphnaepacaglhfaeljngppmcmh'
+    'chrome-extension://ldogapjphnaepacaglhfaeljngppmcmh',
   ];
 
   app.enableCors({
