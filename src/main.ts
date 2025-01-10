@@ -17,9 +17,9 @@ async function bootstrap() {
    *   - Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
    */
   const allowlist = [
-    'http://localhost:3001',
     'https://peacemaker-front-end.fly.dev',
     'chrome-extension://ldogapjphnaepacaglhfaeljngppmcmh',
+    'https://github.com',
   ];
 
   app.enableCors({
@@ -40,7 +40,6 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
 
   app.setGlobalPrefix('api');
-
   // Configure Swagger
   CoreModule.configureSwagger(app);
 
