@@ -10,14 +10,10 @@ import { JwtAuthModule } from './modules/auth/jwt/jwt-auth.module';
 import { JwtAuthStrategy } from './modules/auth/jwt/jwt-auth.strategy';
 import { GithubController } from './modules/auth/oauth/github/github.controller';
 import { GithubModule } from './modules/auth/oauth/github/github.module';
-import { ClassificationController } from './modules/classification/classification.controller';
-import { ClassificationModule } from './modules/classification/classification.module';
 import { CommentController } from './modules/comment/comment.controller';
 import { CommentModule } from './modules/comment/comment.module';
 import { RepositoryController } from './modules/repository/repository.controller';
 import { RepositoryModule } from './modules/repository/repository.module';
-import { SuggestionController } from './modules/suggestion/suggestion.controller';
-import { SuggestionModule } from './modules/suggestion/suggestion.module';
 import { UserController } from './modules/user/user.controller';
 import { UserModule } from './modules/user/user.module';
 
@@ -28,8 +24,10 @@ import { UserModule } from './modules/user/user.module';
     UserModule,
     GithubModule,
     CommentModule,
-    ClassificationModule,
-    SuggestionModule,
+    // TODO: Maybe we should delete this module
+    // ClassificationModule,
+    // TODO: Maybe we should delete this module
+    // SuggestionModule,
     RepositoryModule,
     AnalyticsModule,
     JwtAuthModule,
@@ -39,8 +37,10 @@ import { UserModule } from './modules/user/user.module';
     GithubController,
     AnalyticsController,
     CommentController,
-    ClassificationController,
-    SuggestionController,
+    // TODO: Maybe we should delete this module
+    // ClassificationController,
+    // TODO: Maybe we should delete this module
+    // SuggestionController,
     RepositoryController,
   ],
   providers: [
