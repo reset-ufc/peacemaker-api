@@ -13,6 +13,15 @@ export class CommentService {
     private readonly commentModel: Model<Comment>,
   ) {}
 
+  async findToxicComments(repositoryId: string): Promise<Comment[]> {
+    return this.commentModel
+      .find({
+        repository_id: repositoryId,
+        toxicity_score: { $gt: 0.5 },
+      })
+      .exec();
+  }
+
   async editComment(
     commentId: string,
     newContent: string,
