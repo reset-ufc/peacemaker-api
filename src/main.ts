@@ -17,17 +17,22 @@ async function bootstrap() {
    *   - Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
    */
   const allowlist = [
+    'http://localhost:3001',
     'https://peacemaker-front-end.fly.dev',
-    'chrome-extension://ldogapjphnaepacaglhfaeljngppmcmh',
     'https://github.com',
   ];
 
   app.enableCors({
     origin: (origin, callback) => {
-      if (!origin || allowlist.includes(origin)) {
+      if (
+        !origin ||
+        allowlist.includes(origin) ||
+        origin.startsWith('chrome-extension://')
+      ) {
+        console.log('Allowing CORS request from:', origin);
         callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'));
+        callback(new Error(`${origin} Not allowed by CORS`));
       }
     },
     credentials: true,
