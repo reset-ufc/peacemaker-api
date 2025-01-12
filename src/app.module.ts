@@ -1,42 +1,58 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
+import { ConfigSetupModule } from './config/configure.module';
+import { CoreModule } from './core/core.module';
 
-import { AppController } from './app.controller';
-import { UserController } from './user/user.controller';
-import { AppService } from './app.service';
-import { GithubOauthModule } from './auth/github/github-oauth.module';
-import { UserModule } from './user/user.module';
-import { GhCommentsModule } from './gh-comments/gh-comments.module';
-import appConfig from './config/app.config';
-import { APP_INTERCEPTOR } from '@nestjs/core';
-import { GlobalErrorInterceptor } from './error/global-error.interceptor';
+import { Module, ValidationPipe } from '@nestjs/common';
+import { APP_GUARD, APP_PIPE } from '@nestjs/core';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { AnalyticsModule } from './modules/analytics/analytic.module';
+import { AnalyticsController } from './modules/analytics/analytics.controller';
+import { JwtAuthModule } from './modules/auth/jwt/jwt-auth.module';
+import { JwtAuthStrategy } from './modules/auth/jwt/jwt-auth.strategy';
+import { GithubController } from './modules/auth/oauth/github/github.controller';
+import { GithubModule } from './modules/auth/oauth/github/github.module';
+import { CommentController } from './modules/comment/comment.controller';
+import { CommentModule } from './modules/comment/comment.module';
+import { RepositoryController } from './modules/repository/repository.controller';
+import { RepositoryModule } from './modules/repository/repository.module';
+import { UserController } from './modules/user/user.controller';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      load: [appConfig],
-      envFilePath: '.env',
-    }),
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('databaseUrl'),
-      }),
-    }),
-    GithubOauthModule,
+    ConfigSetupModule,
+    CoreModule,
     UserModule,
-    GhCommentsModule,
+    GithubModule,
+    CommentModule,
+    // TODO: Maybe we should delete this module
+    // ClassificationModule,
+    // TODO: Maybe we should delete this module
+    // SuggestionModule,
+    RepositoryModule,
+    AnalyticsModule,
+    JwtAuthModule,
   ],
-  controllers: [AppController, UserController],
+  controllers: [
+    UserController,
+    GithubController,
+    AnalyticsController,
+    CommentController,
+    // TODO: Maybe we should delete this module
+    // ClassificationController,
+    // TODO: Maybe we should delete this module
+    // SuggestionController,
+    RepositoryController,
+  ],
   providers: [
-    AppService,
     {
-      provide: APP_INTERCEPTOR,
-      useClass: GlobalErrorInterceptor,
+      provide: APP_PIPE,
+      useClass: ValidationPipe,
     },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    JwtAuthStrategy,
   ],
 })
 export class AppModule {}
