@@ -57,14 +57,15 @@ export class GithubService {
     return accessToken;
   }
 
-  public get authorization() {
+  public authorization(callbackUrl?: string) {
     const githubClientId = this.configService.get<string>(
       'auth.github.clientId',
     )!;
     // Erro, GithubApp não configurado.
-    // const redirectUri = this.configService.get<string>(
-    //   'auth.github.callbackURL',
-    // )!;
+    const redirectUri = this.configService.get<string>(
+      'auth.github.callbackURL',
+    )!;
+
     const githubState = encodeURIComponent(
       this.configService.get<string>('auth.github.scope')!,
     );
@@ -72,6 +73,7 @@ export class GithubService {
     const authorizationUrl = GITHUB_AUTHORIZATION_URL(
       githubClientId,
       githubState,
+      callbackUrl ? callbackUrl : redirectUri
     );
 
     return { authorization_url: authorizationUrl };
