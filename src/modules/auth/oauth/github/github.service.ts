@@ -73,7 +73,7 @@ export class GithubService {
     const authorizationUrl = GITHUB_AUTHORIZATION_URL(
       githubClientId,
       githubState,
-      callbackUrl ? callbackUrl : redirectUri
+      callbackUrl ? callbackUrl : redirectUri,
     );
 
     return { authorization_url: authorizationUrl };
