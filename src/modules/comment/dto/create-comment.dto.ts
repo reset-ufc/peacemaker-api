@@ -1,33 +1,34 @@
-import { CreateClassificationDto } from '@/modules/classification/dto/create-classification.dto';
-import { CreateRepositoryDto } from '@/modules/repository/dto/create-repository.dto';
-import { CreateSuggestionDto } from '@/modules/suggestion/dto/create-suggestion.dto';
-import { CreateUserDto } from '@/modules/user/dto/create-user.dto';
-import { Type } from 'class-transformer';
-import { IsNumber, IsString, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsNumber,
+  IsObject,
+  IsString,
+} from 'class-validator';
+import { Comment } from '../entities/comment.entity';
 
-export class CreateCommentDto {
+export class CreateCommentDto extends Comment {
   @IsString()
   comment_or_pull_request_id: string;
 
   @IsString()
   content: string;
 
-  @ValidateNested()
-  @Type(() => CreateRepositoryDto)
-  repository: CreateRepositoryDto;
+  @IsObject()
+  classification: object;
 
-  @ValidateNested()
-  @Type(() => CreateUserDto)
-  user: CreateUserDto;
+  @IsNumber()
+  repository_id: number;
+
+  @IsBoolean()
+  solutioned: boolean;
+
+  @IsArray()
+  suggestion_id: Array<string>;
 
   @IsNumber()
   toxicity: number;
 
-  @ValidateNested()
-  @Type(() => CreateClassificationDto)
-  classification: CreateClassificationDto;
-
-  @ValidateNested()
-  @Type(() => CreateSuggestionDto)
-  suggestion: CreateSuggestionDto;
+  @IsNumber()
+  user_id: number;
 }
