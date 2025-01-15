@@ -1,10 +1,4 @@
-import {
-  IsArray,
-  IsBoolean,
-  IsNumber,
-  IsObject,
-  IsString,
-} from 'class-validator';
+import { IsArray, IsBoolean, IsNumber, IsString } from 'class-validator';
 import { Comment } from '../entities/comment.entity';
 
 export class CreateCommentDto extends Comment {
@@ -14,8 +8,8 @@ export class CreateCommentDto extends Comment {
   @IsString()
   content: string;
 
-  @IsObject()
-  classification: object;
+  @IsString()
+  classification: string;
 
   @IsNumber()
   repository_id: number;
@@ -24,7 +18,7 @@ export class CreateCommentDto extends Comment {
   solutioned: boolean;
 
   @IsArray()
-  suggestion_id: Array<string>;
+  suggestion: Array<string>;
 
   @IsNumber()
   toxicity: number;
