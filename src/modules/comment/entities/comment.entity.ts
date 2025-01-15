@@ -28,11 +28,11 @@ export class Comment {
 
   @ApiProperty()
   @Prop()
-  classification: object;
+  classification: string;
 
   @ApiProperty()
   @Prop()
-  suggestion_id: Array<string>;
+  suggestions: Array<string>;
 
   @ApiProperty()
   @Prop()
