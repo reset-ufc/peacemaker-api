@@ -1,16 +1,18 @@
+import { UserService } from '@/modules/user/user.service';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import axios from 'axios';
 import { Model } from 'mongoose';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { Comment } from './entities/comment.entity';
-import axios from 'axios';
 
 @Injectable()
 export class CommentService {
   constructor(
     @InjectModel(Comment.name)
     private readonly commentModel: Model<Comment>,
+    private readonly userService: UserService,
   ) {}
 
   async findToxicComments(repositoryId: string): Promise<Comment[]> {

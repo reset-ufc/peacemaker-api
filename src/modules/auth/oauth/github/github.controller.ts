@@ -10,9 +10,16 @@ export class GithubController {
   constructor(private readonly githubService: GithubService) {}
 
   @IsPublic()
+  @ApiQuery({
+    name: 'callback_url',
+    type: String,
+    nullable: true,
+    required: false,
+  })
   @Get('')
-  login() {
-    return this.githubService.authorization;
+  autorization(@Query('callback_url') callbackUrl?: string) {
+    const autorizationUrl = this.githubService.authorization(callbackUrl);
+    return autorizationUrl;
   }
 
   @IsPublic()

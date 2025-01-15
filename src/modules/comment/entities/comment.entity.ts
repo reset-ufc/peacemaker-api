@@ -1,7 +1,3 @@
-import { Classification } from '@/modules/classification/entities/classification.entity';
-import { Repository } from '@/modules/repository/entities/repository.entity';
-import { Suggestion } from '@/modules/suggestion/entities/suggestion.entity';
-import { User } from '@/modules/user/entities/user.entity';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import mongoose from 'mongoose';
@@ -19,24 +15,24 @@ export class Comment {
   content: string;
 
   @ApiProperty()
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Repository' })
-  repository_id: Repository;
+  @Prop()
+  repository_id: number;
 
   @ApiProperty()
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
-  user_id: User;
+  @Prop()
+  user_id: number;
 
   @ApiProperty()
   @Prop()
   toxicity: number;
 
   @ApiProperty()
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Classification' })
-  classification_id: Classification;
+  @Prop()
+  classification: string;
 
   @ApiProperty()
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Suggestion' })
-  suggestion_id: Suggestion;
+  @Prop()
+  suggestions: Array<string>;
 
   @ApiProperty()
   @Prop()

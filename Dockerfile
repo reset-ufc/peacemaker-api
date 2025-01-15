@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:1
 
-ARG NODE_VERSION=20.17.0
+ARG NODE_VERSION=20.18.1
 
 # Base stage with shared configurations
 FROM node:${NODE_VERSION}-slim AS base

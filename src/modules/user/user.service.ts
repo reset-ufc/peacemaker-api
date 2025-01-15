@@ -16,6 +16,14 @@ export class UserService {
     return user.save();
   }
 
+  public async findOneByUsername(username: string) {
+    return this.userModel
+      .findOne({
+        username,
+      })
+      .exec();
+  }
+
   public async findOneByGithubId(githubId: number) {
     return this.userModel.findOne({ github_id: githubId }).exec();
   }
