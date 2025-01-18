@@ -46,12 +46,12 @@ export class RepositoryService {
         },
       })
       .then(
-        (response) =>
-          response.data as unknown as Array<GithubRepositoryResponse>,
+        response => response.data as unknown as Array<GithubRepositoryResponse>,
       );
 
+    // TODO: some privates repositories are not saved on the database
     const repositoriesFiltered = response.filter(
-      (repository) => repository.permissions.admin,
+      repository => repository.permissions.admin,
     );
 
     const repositoriesInserted: Repository[] = repositoriesFiltered.map(
@@ -75,6 +75,7 @@ export class RepositoryService {
     // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
     const existingRepositories = await this.findAll(user?.github_id!);
 
+    // TODO: validate user repositories, insert new ones;
     // if the user already has repositories, we don't need to insert them again
     if (existingRepositories.length > 0) {
       return existingRepositories;
@@ -82,10 +83,10 @@ export class RepositoryService {
 
     // validate if the user has all remote repositories on local database
     // if not, we need to insert them
-    repositoriesInserted.forEach((repository) => {
+    repositoriesInserted.forEach(repository => {
       if (
         !existingRepositories.find(
-          (r) => r.repository_id === repository.repository_id,
+          r => r.repository_id === repository.repository_id,
         )
       ) {
         this.create(repository);

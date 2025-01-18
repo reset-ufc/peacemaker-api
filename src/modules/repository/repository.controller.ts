@@ -16,14 +16,14 @@ export class RepositoryController {
     return { repositories };
   }
 
-  @Get('/remote')
+  @Get('remote')
   getRepositoriesFromRemote(@Req() request: Request) {
     const user = request?.user as User;
 
     return this.repositoryService.findRemoteRepositories(user.github_id);
   }
 
-  @Get(':username/:repository')
+  @Get(':repository')
   getRepository(
     @Req() request: Request,
     @Param('username') username: string,
