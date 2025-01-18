@@ -1,28 +1,41 @@
-import { IsArray, IsBoolean, IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsObject, IsString } from 'class-validator';
 import { Comment } from '../entities/comment.entity';
 
 export class CreateCommentDto extends Comment {
   @IsString()
-  comment_or_pull_request_id: string;
+  comment_id: string;
+
+  @IsString()
+  user_id: string;
+
+  @IsString()
+  @IsString()
+  repository_id: string;
+
+  @IsString()
+  login: string;
+
+  @IsString()
+  repo_full_name: string;
+
+  @IsString()
+  created_at: string;
 
   @IsString()
   content: string;
 
   @IsString()
-  classification: string;
+  toxicity: string;
 
-  @IsNumber()
-  repository_id: number;
+  @IsObject()
+  suggestions: object;
+
+  @IsString()
+  classification: string;
 
   @IsBoolean()
   solutioned: boolean;
 
-  @IsArray()
-  suggestion: Array<string>;
-
-  @IsNumber()
-  toxicity: number;
-
-  @IsNumber()
-  user_id: number;
+  @IsString()
+  solution: string;
 }

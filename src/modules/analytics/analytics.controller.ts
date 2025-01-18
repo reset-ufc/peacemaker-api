@@ -8,13 +8,13 @@ export class AnalyticsController {
   constructor(private readonly analyticsService: AnalyticsService) {}
 
   // TODO: implement
-  @Get()
+  @Get(':username')
   getAllAnalytics() {
     return this.analyticsService.getAllAnalytics();
   }
 
   // TODO: implement
-  @Get(':repository_id')
+  @Get(':username/:repository_id')
   getAnalytics(@Param('repository_id') repositoryId: string) {
     return this.analyticsService.getAnalytics(repositoryId);
   }
