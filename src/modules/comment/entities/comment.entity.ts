@@ -4,11 +4,35 @@ import mongoose from 'mongoose';
 
 export type CommentDocument = mongoose.Document;
 
+export type Suggestions = {
+  corrected_comment: string;
+};
+
 @Schema()
 export class Comment {
   @ApiProperty()
   @Prop()
-  comment_or_pull_request_id: string;
+  comment_id: string;
+
+  @ApiProperty()
+  @Prop()
+  user_id: string;
+
+  @ApiProperty()
+  @Prop()
+  repository_id: string;
+
+  @ApiProperty()
+  @Prop()
+  login: string;
+
+  @ApiProperty()
+  @Prop()
+  repo_full_name: string;
+
+  @ApiProperty()
+  @Prop()
+  created_at: string;
 
   @ApiProperty()
   @Prop()
@@ -16,15 +40,11 @@ export class Comment {
 
   @ApiProperty()
   @Prop()
-  repository_id: number;
+  toxicity: string;
 
   @ApiProperty()
-  @Prop()
-  user_id: number;
-
-  @ApiProperty()
-  @Prop()
-  toxicity: number;
+  @Prop({ type: Object })
+  suggestions: object;
 
   @ApiProperty()
   @Prop()
@@ -32,11 +52,11 @@ export class Comment {
 
   @ApiProperty()
   @Prop()
-  suggestions: Array<string>;
+  solutioned: boolean;
 
   @ApiProperty()
   @Prop()
-  solutioned: boolean;
+  solution: string;
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);
