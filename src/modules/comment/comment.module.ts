@@ -1,4 +1,5 @@
 import { UserModule } from '@/modules/user/user.module';
+import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CommentController } from './comment.controller';
@@ -7,6 +8,7 @@ import { Comment, CommentSchema } from './entities/comment.entity';
 
 @Module({
   imports: [
+    HttpModule,
     UserModule,
     MongooseModule.forFeature([
       {

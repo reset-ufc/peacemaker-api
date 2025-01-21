@@ -28,7 +28,9 @@ export class CreateCommentDto extends Comment {
   toxicity: string;
 
   @IsObject()
-  suggestions: object;
+  suggestions: {
+    corrected_comment: string;
+  };
 
   @IsString()
   classification: string;
