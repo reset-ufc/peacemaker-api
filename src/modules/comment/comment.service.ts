@@ -1,8 +1,11 @@
 import { UserService } from '@/modules/user/user.service';
+import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { AxiosError } from 'axios';
 import { Model } from 'mongoose';
 import { Comment } from './entities/comment.entity';
+import { GithubResponse } from './entities/github-response.entity';
 
 @Injectable()
 export class CommentService {
@@ -10,64 +13,46 @@ export class CommentService {
     @InjectModel(Comment.name)
     private readonly commentModel: Model<Comment>,
     private readonly userService: UserService,
+    private readonly httpService: HttpService,
   ) {}
 
-  // async findToxicComments(repositoryId: string): Promise<Comment[]> {
-  //   return this.commentModel
-  //     .find({
-  //       repository_id: repositoryId,
-  //       toxicity_score: { $gt: 0.5 },
-  //     })
-  //     .exec();
-  // }
+  async editComment(token: string, username: string, commentId: string) {
+    const comment = await this.commentModel.findOne({
+      comment_id: commentId,
+      login: username,
+    });
 
-  // async editComment(
-  //   commentId: string,
-  //   newContent: string,
-  //   owner: string,
-  //   repo: string,
-  // ): Promise<any> {
-  //   const githubToken = process.env.GITHUB_PERSONAL_ACCESS_TOKEN; // Token de acesso pessoal do GitHub
+    if (comment != null) {
+      const [owner, repo] = comment.repo_full_name.split('/');
 
-  //   if (!githubToken) {
-  //     throw new Error(
-  //       'GitHub token is missing. Set it in the environment variables.',
-  //     );
-  //   }
+      const url = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues/comments/${encodeURIComponent(commentId)}`;
 
-  //   try {
-  //     const response = await axios.patch(
-  //       // Endpoint para atualizar um comentário no GitHub, Lembrar de remover o owner e repo estáticos
-  //       `https://api.github.com/repos/${owner}/${repo}/issues/comments/${commentId}`,
-  //       { body: newContent },
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${githubToken}`,
-  //           Accept: 'application/vnd.github+json',
-  //         },
-  //       },
-  //     );
+      try {
+        const response = await this.httpService.axiosRef.patch(
+          url,
+          { body: comment.suggestions.corrected_comment },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: 'application/vnd.github+json',
+            },
+          },
+        );
 
-  //     return {
-  //       message: 'Comment updated successfully',
-  //       data: response.data,
-  //     };
-  //   } catch (error) {
-  //     console.error(
-  //       'Error updating comment:',
-  //       error.response?.data || error.message,
-  //     );
-  //     throw new Error('Failed to update comment on GitHub.');
-  //   }
-  // }
+        const responseData = (await response.data) as unknown as GithubResponse;
 
-  // create(repositoryId: string, createCommentDto: CreateCommentDto) {
-  //   const comment = new this.commentModel({
-  //     ...createCommentDto,
-  //     repository_id: repositoryId,
-  //   });
-  //   return comment.save();
-  // }
+        return responseData;
+      } catch (error) {
+        if (error instanceof AxiosError) {
+          console.error('Error fetching access token:', error.response?.data);
+          throw new Error(`Failed to fetch access token: ${error.message}`);
+        }
+        throw error;
+      }
+    }
+
+    return { msg: 'no comment found' };
+  }
 
   findAll() {
     return this.commentModel.find();
@@ -82,11 +67,4 @@ export class CommentService {
       comment_id: id,
     });
   }
-
-  // update(id: string, updateCommentDto: UpdateCommentDto) {
-  //   return this.commentModel.findOneAndUpdate(
-  //     { comment_id: id },
-  //     updateCommentDto,
-  //   );
-  // }
 }

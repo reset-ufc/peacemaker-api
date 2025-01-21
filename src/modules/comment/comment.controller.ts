@@ -1,6 +1,6 @@
 import { IsPublic } from '@/common/decorators/is-public.decorator';
 import { UserService } from '@/modules/user/user.service';
-import { Controller, Get, HttpStatus, Param, Res } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Param, Patch, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { CommentService } from './comment.service';
@@ -85,22 +85,26 @@ export class CommentController {
   //   return { id, content: body.content };
   // }
 
-  // @Patch(':id')
-  // async editComment(
-  //   @Param('id') commentId: string,
-  //   @Body() body: { content: string; owner: string; repo: string },
-  // ) {
-  //   if (!body.content) {
-  //     throw new Error('Content cannot be empty.');
-  //   }
+  @IsPublic()
+  @Patch(':username/:id')
+  async editComment(
+    @Res() response: Response,
+    @Param('username') username: string,
+    @Param('id') commentId: string,
+  ) {
+    const user = await this.userService.findOneByUsername(username);
+    if (!user) {
+      return response.status(HttpStatus.UNAUTHORIZED).send();
+    }
 
-  //   return await this.commentService.editComment(
-  //     commentId,
-  //     body.content,
-  //     body.owner,
-  //     body.repo,
-  //   );
-  // }
+    const correctedComment = await this.commentService.editComment(
+      user.github_token,
+      username,
+      commentId,
+    );
+
+    return response.status(HttpStatus.OK).json(correctedComment);
+  }
 
   // @Delete(':repository_id/:id')
   // // eslint-disable-next-line @typescript-eslint/no-unused-vars
