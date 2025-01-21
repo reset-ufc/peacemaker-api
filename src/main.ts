@@ -18,6 +18,7 @@ async function bootstrap() {
    */
   const allowlist = [
     'http://localhost:3001',
+    'http://localhost:3000',
     'https://peacemaker-front-end.fly.dev',
     'https://github.com',
   ];
