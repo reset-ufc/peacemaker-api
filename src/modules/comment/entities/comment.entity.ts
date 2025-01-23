@@ -2,7 +2,10 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import mongoose from 'mongoose';
 
-export type CommentDocument = mongoose.Document;
+export type CommentDocument = mongoose.Document & {
+  classification?: string;
+  score: 0;
+};
 
 export type Suggestions = {
   corrected_comment: string;
@@ -51,6 +54,9 @@ export class Comment {
   @ApiProperty()
   @Prop()
   classification: string;
+
+  @Prop({ default: 0 })
+  score: number;
 
   @ApiProperty()
   @Prop()

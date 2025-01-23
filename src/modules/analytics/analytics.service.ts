@@ -1,65 +1,80 @@
-import { Comment } from '@/modules/comment/entities/comment.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { Comment, CommentDocument } from '../comment/entities/comment.entity';
 
 @Injectable()
 export class AnalyticsService {
   constructor(
     @InjectModel(Comment.name)
-    private readonly commentModel: Model<Comment>,
+    private readonly commentModel: Model<CommentDocument>,
   ) {}
 
-  // TODO: implement this method
-  getAllAnalytics() {
-    return {
-      totalRepositories: 120,
-      averageCommentsToxicity: 0.45,
-      medianCommentsToxicity: 0.2,
-      totalComments: 1300,
-      resolvedComments: 100,
-
-      moderationActivity: [
-        {
-          sentiment: 'toxic',
-          comments: 10,
-        },
-        {
-          sentiment: 'neutral',
-          comments: 20,
-        },
-        {
-          sentiment: 'positive',
-          comments: 30,
-        },
-      ],
-    };
+  async calculateAverageScore(
+    userId: string,
+    repositoryId: string,
+  ): Promise<number> {
+    const comments = await this.commentModel
+      .find({ user_id: userId, repository_id: repositoryId, removed: false })
+      .exec();
+    if (comments.length === 0) {
+      return 0;
+    }
+    const totalScore = comments.reduce(
+      (sum, comment) => sum + (comment.score || 0),
+      0,
+    );
+    return (totalScore / comments.length) * 100;
   }
 
-  // TODO: implement this method
-  getAnalytics(repositoryId: string) {
-    return {
-      id: repositoryId,
-      totalRepositories: 120,
-      averageCommentsToxicity: 0.45,
-      medianCommentsToxicity: 0.2,
-      totalComments: 1300,
-      resolvedComments: 100,
+  async getTotalComments(
+    userId: string,
+    repositoryId: string,
+  ): Promise<number> {
+    return this.commentModel
+      .countDocuments({ user_id: userId, repository_id: repositoryId })
+      .exec();
+  }
 
-      moderationActivity: [
-        {
-          sentiment: 'toxic',
-          comments: 10,
-        },
-        {
-          sentiment: 'neutral',
-          comments: 20,
-        },
-        {
-          sentiment: 'positive',
-          comments: 30,
-        },
-      ],
-    };
+  async countRemovedComments(
+    userId: string,
+    repositoryId: string,
+  ): Promise<number> {
+    return this.commentModel
+      .countDocuments({
+        user_id: userId,
+        repository_id: repositoryId,
+        removed: true,
+      })
+      .exec();
+  }
+
+  async countAbsoluteComments(
+    userId: string,
+    repositoryId: string,
+  ): Promise<number> {
+    const comments = await this.commentModel
+      .find({ user_id: userId, repository_id: repositoryId, removed: false })
+      .exec();
+    return comments.length;
+  }
+
+  async getIncivilityTypes(
+    userId: string,
+    repositoryId: string,
+  ): Promise<Record<string, number>> {
+    const comments = await this.commentModel
+      .find({ user_id: userId, repository_id: repositoryId })
+      .exec();
+    const incivilityCount: Record<string, number> = {};
+
+    comments.forEach(comment => {
+      if (comment.classification) {
+        incivilityCount[comment.classification] =
+          (incivilityCount[comment.classification] || 0) + 1;
+      }
+    });
+
+    return incivilityCount;
   }
 }
