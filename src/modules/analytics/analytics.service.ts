@@ -10,36 +10,34 @@ export class AnalyticsService {
     private readonly commentModel: Model<CommentDocument>,
   ) {}
 
-  async calculateAverageScore(
-    userId: string,
-    repositoryId: string,
-  ): Promise<number> {
-    const comments = await this.commentModel
+  private async getComments(userId: number, repositoryId: string) {
+    return this.commentModel
       .find({ user_id: userId, repository_id: repositoryId, removed: false })
       .exec();
+  }
+
+  async calculateAverageScore(userId: number, repositoryId: string) {
+    const comments = await this.getComments(userId, repositoryId);
+
     if (comments.length === 0) {
       return 0;
     }
+
     const totalScore = comments.reduce(
       (sum, comment) => sum + (comment.score || 0),
       0,
     );
+
     return (totalScore / comments.length) * 100;
   }
 
-  async getTotalComments(
-    userId: string,
-    repositoryId: string,
-  ): Promise<number> {
+  async getTotalComments(userId: number, repositoryId: string) {
     return this.commentModel
       .countDocuments({ user_id: userId, repository_id: repositoryId })
       .exec();
   }
 
-  async countRemovedComments(
-    userId: string,
-    repositoryId: string,
-  ): Promise<number> {
+  async countRemovedComments(userId: number, repositoryId: string) {
     return this.commentModel
       .countDocuments({
         user_id: userId,
@@ -49,23 +47,14 @@ export class AnalyticsService {
       .exec();
   }
 
-  async countAbsoluteComments(
-    userId: string,
-    repositoryId: string,
-  ): Promise<number> {
-    const comments = await this.commentModel
-      .find({ user_id: userId, repository_id: repositoryId, removed: false })
-      .exec();
+  async countAbsoluteComments(userId: number, repositoryId: string) {
+    const comments = await this.getComments(userId, repositoryId);
     return comments.length;
   }
 
-  async getIncivilityTypes(
-    userId: string,
-    repositoryId: string,
-  ): Promise<Record<string, number>> {
-    const comments = await this.commentModel
-      .find({ user_id: userId, repository_id: repositoryId })
-      .exec();
+  async getIncivilityTypes(userId: number, repositoryId: string) {
+    const comments = await this.getComments(userId, repositoryId);
+
     const incivilityCount: Record<string, number> = {};
 
     comments.forEach(comment => {
