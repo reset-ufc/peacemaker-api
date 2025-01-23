@@ -45,12 +45,12 @@ export class AnalyticsController {
       repositoryId,
     );
 
-    return {
-      averageScore,
-      totalComments,
-      removedComments,
-      absoluteComments,
-      incivilityTypes,
-    };
+    return response.status(HttpStatus.OK).json({
+      average_score: averageScore,
+      total_comments: totalComments,
+      removed_comments: removedComments,
+      absolute_comments: absoluteComments,
+      incivility_types: incivilityTypes,
+    });
   }
 }
