@@ -1,4 +1,3 @@
-import { UserService } from '@/modules/user/user.service';
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -12,7 +11,6 @@ export class CommentService {
   constructor(
     @InjectModel(Comment.name)
     private readonly commentModel: Model<Comment>,
-    private readonly userService: UserService,
     private readonly httpService: HttpService,
   ) {}
 

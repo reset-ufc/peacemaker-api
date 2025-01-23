@@ -52,6 +52,11 @@ export class Comment {
   @Prop()
   classification: string;
 
+  // TODO: This field don't exist on bot's document
+  @ApiProperty()
+  @Prop({ default: 0 })
+  score: number;
+
   @ApiProperty()
   @Prop()
   solutioned: boolean;
