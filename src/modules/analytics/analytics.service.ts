@@ -1,7 +1,10 @@
+import {
+  Comment,
+  CommentDocument,
+} from '@/modules/comment/entities/comment.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Comment, CommentDocument } from '../comment/entities/comment.entity';
 
 @Injectable()
 export class AnalyticsService {

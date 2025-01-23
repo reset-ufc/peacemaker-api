@@ -1,7 +1,7 @@
+import { UserService } from '@/modules/user/user.service';
 import { Controller, Get, HttpStatus, Param, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
-import { UserService } from '../user/user.service';
 import { AnalyticsService } from './analytics.service';
 
 @ApiTags('Analytics')
