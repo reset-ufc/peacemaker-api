@@ -1,47 +1,56 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Param, Res } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
+import { UserService } from '../user/user.service';
 import { AnalyticsService } from './analytics.service';
 
-@Controller('analytics')
+@ApiTags('Analytics')
+@Controller('v1/analytics')
 export class AnalyticsController {
-  constructor(private readonly analyticsService: AnalyticsService) {}
+  constructor(
+    private readonly analyticsService: AnalyticsService,
+    private readonly userService: UserService,
+  ) {}
 
-  @Get(':userId/:repositoryId/average-score')
-  async getAverageScore(
-    @Param('userId') userId: string,
-    @Param('repositoryId') repositoryId: string,
-  ): Promise<number> {
-    return this.analyticsService.calculateAverageScore(userId, repositoryId);
-  }
+  @Get(':username/:repository_id/metrics')
+  async getAllMetrics(
+    @Res() response: Response,
+    @Param('username') username: string,
+    @Param('repository_id') repositoryId: string,
+  ) {
+    const user = await this.userService.findOneByUsername(username);
 
-  @Get(':userId/:repositoryId/total-comments')
-  async getTotalComments(
-    @Param('userId') userId: string,
-    @Param('repositoryId') repositoryId: string,
-  ): Promise<number> {
-    return this.analyticsService.getTotalComments(userId, repositoryId);
-  }
+    if (!user) {
+      return response.status(HttpStatus.UNAUTHORIZED).send();
+    }
 
-  @Get(':userId/:repositoryId/removed-comments')
-  async getRemovedComments(
-    @Param('userId') userId: string,
-    @Param('repositoryId') repositoryId: string,
-  ): Promise<number> {
-    return this.analyticsService.countRemovedComments(userId, repositoryId);
-  }
+    const averageScore = await this.analyticsService.calculateAverageScore(
+      user.github_id,
+      repositoryId,
+    );
+    const totalComments = await this.analyticsService.getTotalComments(
+      user.github_id,
+      repositoryId,
+    );
+    const removedComments = await this.analyticsService.countRemovedComments(
+      user.github_id,
+      repositoryId,
+    );
+    const absoluteComments = await this.analyticsService.countAbsoluteComments(
+      user.github_id,
+      repositoryId,
+    );
+    const incivilityTypes = await this.analyticsService.getIncivilityTypes(
+      user.github_id,
+      repositoryId,
+    );
 
-  @Get(':userId/:repositoryId/absolute-comments')
-  async getAbsoluteComments(
-    @Param('userId') userId: string,
-    @Param('repositoryId') repositoryId: string,
-  ): Promise<number> {
-    return this.analyticsService.countAbsoluteComments(userId, repositoryId);
-  }
-
-  @Get(':userId/:repositoryId/incivility-types')
-  async getIncivilityTypes(
-    @Param('userId') userId: string,
-    @Param('repositoryId') repositoryId: string,
-  ): Promise<Record<string, number>> {
-    return this.analyticsService.getIncivilityTypes(userId, repositoryId);
+    return {
+      averageScore,
+      totalComments,
+      removedComments,
+      absoluteComments,
+      incivilityTypes,
+    };
   }
 }
