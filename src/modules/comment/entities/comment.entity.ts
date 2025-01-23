@@ -2,10 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import mongoose from 'mongoose';
 
-export type CommentDocument = mongoose.Document & {
-  classification?: string;
-  score: 0;
-};
+export type CommentDocument = mongoose.Document;
 
 export type Suggestions = {
   corrected_comment: string;
