@@ -30,7 +30,7 @@ export class CreateCommentDto extends Comment {
   @IsObject()
   suggestions: {
     corrected_comment: string;
-  };
+  }[];
 
   @IsString()
   classification: string;
