@@ -44,9 +44,7 @@ export class Comment {
 
   @ApiProperty()
   @Prop({ type: Object })
-  suggestions: {
-    corrected_comment: string;
-  };
+  suggestions: { corrected_comment: string }[];
 
   @ApiProperty()
   @Prop()

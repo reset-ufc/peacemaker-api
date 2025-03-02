@@ -72,6 +72,28 @@ export class CommentController {
     return response.status(HttpStatus.OK).json(comment);
   }
 
+  @IsPublic()
+  @Patch(':username/:id/reject-suggestion/:suggestionIndex')
+  async rejectSuggestion(
+    @Res() response: Response,
+    @Param('username') username: string,
+    @Param('id') commentId: string,
+    @Param('suggestionIndex') suggestionIndex: number,
+  ) {
+    const user = await this.userService.findOneByUsername(username);
+
+    if (!user) {
+      return response.status(HttpStatus.UNAUTHORIZED).send();
+    }
+
+    const result = await this.commentService.rejectSuggestion(
+      username,
+      commentId,
+      suggestionIndex,
+    );
+    return response.status(HttpStatus.OK).json(result);
+  }
+
   // @Post(':repository_id')
   // createComment(
   //   @Param('repository_id') repositoryId: string,
@@ -86,11 +108,12 @@ export class CommentController {
   // }
 
   @IsPublic()
-  @Patch(':username/:id')
+  @Patch(':username/:id/edit-comment/:suggestionIndex')
   async editComment(
     @Res() response: Response,
     @Param('username') username: string,
     @Param('id') commentId: string,
+    @Param('suggestionIndex') suggestionIndex: number,
   ) {
     const user = await this.userService.findOneByUsername(username);
     if (!user) {
@@ -101,6 +124,7 @@ export class CommentController {
       user.github_token,
       username,
       commentId,
+      suggestionIndex,
     );
 
     return response.status(HttpStatus.OK).json(correctedComment);

@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { AxiosError } from 'axios';
 import { Model } from 'mongoose';
@@ -14,7 +14,12 @@ export class CommentService {
     private readonly httpService: HttpService,
   ) {}
 
-  async editComment(token: string, username: string, commentId: string) {
+  async editComment(
+    token: string,
+    username: string,
+    commentId: string,
+    suggestionIndex: number,
+  ) {
     const comment = await this.commentModel.findOne({
       comment_id: commentId,
       login: username,
@@ -28,7 +33,7 @@ export class CommentService {
       try {
         const response = await this.httpService.axiosRef.patch(
           url,
-          { body: comment.suggestions.corrected_comment },
+          { body: comment.suggestions[suggestionIndex].corrected_comment },
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -50,6 +55,43 @@ export class CommentService {
     }
 
     return { msg: 'no comment found' };
+  }
+
+  async rejectSuggestion(
+    username: string,
+    commentId: string,
+    suggestionIndex: number,
+  ) {
+    const comment = await this.commentModel
+      .findOne({
+        comment_id: commentId,
+        login: username,
+      })
+      .exec();
+
+    if (!comment) {
+      return { status: HttpStatus.NOT_FOUND, message: 'Comment not found' };
+    }
+
+    if (
+      !comment.suggestions ||
+      suggestionIndex < 0 ||
+      suggestionIndex >= comment.suggestions.length
+    ) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: 'Invalid suggestion index',
+      };
+    }
+
+    comment.suggestions.splice(suggestionIndex, 1);
+    comment.markModified('suggestions');
+    await comment.save();
+
+    return {
+      status: HttpStatus.OK,
+      message: 'Suggestion rejected successfully',
+    };
   }
 
   findAll() {
