@@ -5,11 +5,13 @@ export interface AppConfig {
   };
 
   database: {
-    name?: string;
-    user?: string;
-    password?: string;
-    host?: string;
-    url: string;
+    mongodb: {
+      name?: string;
+      user?: string;
+      password?: string;
+      host?: string;
+      url: string;
+    };
   };
 
   auth: {
@@ -17,6 +19,7 @@ export interface AppConfig {
       secret: string;
       expiresInSeconds: number;
     };
+
     github: {
       clientId: string;
       clientSecret: string;
