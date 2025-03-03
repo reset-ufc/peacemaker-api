@@ -12,7 +12,7 @@ async function bootstrap() {
 
   /**
    * Enable CORS with the following settings:
-   *   - Allow any origin to access the application
+   *   - Allow any origin to access the application (e.g. http://localhost:3000)
    *   - Allow credentials (cookies, authentication headers) to be sent with requests
    *   - Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
    */
@@ -46,14 +46,17 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
 
   app.setGlobalPrefix('api');
+
   // Configure Swagger
   CoreModule.configureSwagger(app);
 
   // Get the ConfigService instance to access configuration variables
   const configService = app.get(ConfigService);
+  const PORT = configService.get<number>('server.port');
 
   // Start the application and listen on the port specified in the configuration
-  await app.listen(configService.get<number>('server.port') as number);
+  console.log(`Server is running on port ${PORT}`);
+  await app.listen(PORT as number);
 }
 
 bootstrap();
