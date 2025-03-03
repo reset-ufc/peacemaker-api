@@ -1,11 +1,6 @@
-import {
-  GITHUB_AUTHORIZATION_URL,
-  GITHUB_PROFILE_URL,
-  GITHUB_TOKEN_URL,
-} from '@/config/github.containsts';
 import { JwtAuthService } from '@/modules/auth/jwt/jwt-auth.service';
-import { CreateUserDto } from '@/modules/user/dto/create-user.dto';
-import { UserService } from '@/modules/user/user.service';
+import { CreateUserDto } from '@/modules/users/dto/create-user.dto';
+import { UsersService } from '@/modules/users/users.service';
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -18,38 +13,38 @@ export class GithubService {
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
     private readonly jwtAuthService: JwtAuthService,
-    private readonly userService: UserService,
+    private readonly userService: UsersService,
   ) {}
-
-  public get login() {
-    return 'login';
-  }
 
   public async callback(code: string): Promise<string> {
     const accessTokenResponse = await this.accessToken(code);
     const profile = await this.profile(accessTokenResponse.access_token);
 
-    const user = await this.userService.findOneByGithubId(profile.id);
+    const user = await this.userService.findOneByGithubId(String(profile.id));
 
     if (!user) {
       const createUserDto: CreateUserDto = {
-        github_id: profile.id,
-        username: profile.login,
-        name: profile.name,
+        github_id: String(profile.id),
         email: profile.email,
+        name: profile.name,
+        username: profile.login,
         avatar_url: profile.avatar_url,
-        github_token: accessTokenResponse.access_token,
+        encrypted_token: accessTokenResponse.access_token,
+        threshold: 7,
+        temperature: 0,
       };
 
       const createdUser = await this.userService.create(createUserDto);
+
+      console.log('createdUser', createdUser);
 
       const { accessToken } = this.jwtAuthService.login(createdUser);
 
       return accessToken;
     }
 
-    await this.userService.updateByGithubId(profile.id, {
-      github_token: accessTokenResponse.access_token,
+    await this.userService.updateByGithubId(String(profile.id), {
+      encrypted_token: accessTokenResponse.access_token,
     });
 
     const { accessToken } = this.jwtAuthService.login(user);
@@ -57,7 +52,7 @@ export class GithubService {
     return accessToken;
   }
 
-  public authorization(callbackUrl?: string) {
+  public authorization(state: string = 'web') {
     const githubClientId = this.configService.get<string>(
       'auth.github.clientId',
     )!;
@@ -66,17 +61,13 @@ export class GithubService {
       'auth.github.callbackURL',
     )!;
 
-    const githubState = encodeURIComponent(
+    const githubScope = encodeURIComponent(
       this.configService.get<string>('auth.github.scope')!,
     );
 
-    const authorizationUrl = GITHUB_AUTHORIZATION_URL(
-      githubClientId,
-      githubState,
-      callbackUrl ? callbackUrl : redirectUri,
-    );
+    const authorizationUrl = `https://github.com/login/oauth/authorize?client_id=${githubClientId}&response_type=code&scope=${githubScope}&redirect_uri=${redirectUri}&state=${state}`;
 
-    return { authorization_url: authorizationUrl };
+    return authorizationUrl;
   }
 
   private async accessToken(code: string) {
@@ -90,7 +81,7 @@ export class GithubService {
 
     try {
       const response = await this.httpService.axiosRef.post(
-        GITHUB_TOKEN_URL(),
+        'https://github.com/login/oauth/access_token',
         {
           client_id: githubClientId,
           client_secret: githubSecret,
@@ -120,7 +111,7 @@ export class GithubService {
   private async profile(accessToken: string) {
     try {
       const responseUser = await this.httpService.axiosRef.get(
-        GITHUB_PROFILE_URL(),
+        'https://api.github.com/user',
         {
           headers: {
             Accept: 'application/json',
