@@ -1,13 +1,13 @@
-import { User } from '@/modules/user/entities/user.entity';
 import { Controller, Get, Param, Req } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
-import { RepositoryService } from './repository.service';
+import { User } from '../users/entities/user.entity';
+import { RepositoriesService } from './repositories.service';
 
-@ApiTags('Repository')
-@Controller('v1/repository')
-export class RepositoryController {
-  constructor(private readonly repositoryService: RepositoryService) {}
+@ApiTags('Repositories')
+@Controller('repositories')
+export class RepositoriesController {
+  constructor(private readonly repositoryService: RepositoriesService) {}
 
   @Get()
   async getAllRepositories(@Req() request: Request) {

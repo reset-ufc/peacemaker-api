@@ -1,24 +1,24 @@
-import { UserModule } from '@/modules/user/user.module';
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { UsersModule } from '../users/users.module';
 import { Repository, RepositorySchema } from './entities/repository.entity';
-import { RepositoryController } from './repository.controller';
-import { RepositoryService } from './repository.service';
+import { RepositoriesController } from './repositories.controller';
+import { RepositoriesService } from './repositories.service';
 
 @Module({
   imports: [
+    UsersModule,
+    HttpModule,
     MongooseModule.forFeature([
       {
         name: Repository.name,
         schema: RepositorySchema,
       },
     ]),
-    UserModule,
-    HttpModule,
   ],
-  controllers: [RepositoryController],
-  providers: [RepositoryService],
-  exports: [RepositoryService],
+  providers: [RepositoriesService],
+  controllers: [RepositoriesController],
+  exports: [RepositoriesService],
 })
-export class RepositoryModule {}
+export class RepositoriesModule {}

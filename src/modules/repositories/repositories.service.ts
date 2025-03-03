@@ -1,18 +1,18 @@
-import { UserService } from '@/modules/user/user.service';
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, ObjectId } from 'mongoose';
+import { UsersService } from '../users/users.service';
 import { CreateRepositoryDto } from './dto/create-repository.dto';
-import { GithubRepositoryResponse } from './entities/repository-response.entity';
+import { GithubRepositoryResponse } from './entities/repositories-reponse.entity';
 import { Repository } from './entities/repository.entity';
 
 @Injectable()
-export class RepositoryService {
+export class RepositoriesService {
   constructor(
     @InjectModel(Repository.name)
     private readonly repositoryModel: Model<Repository>,
-    private readonly userService: UserService,
+    private readonly userService: UsersService,
     private readonly httpService: HttpService,
   ) {}
 
@@ -21,11 +21,11 @@ export class RepositoryService {
     return repository.save();
   }
 
-  findAll(githubId: number) {
+  findAll(githubId: string) {
     return this.repositoryModel.find({ user_id: githubId }).exec();
   }
 
-  findOne(username: string, repository: string, githubId: number) {
+  findOne(username: string, repository: string, githubId: string) {
     const repositoryFullName = username + '/' + repository;
     return this.repositoryModel
       .findOne({
@@ -35,13 +35,17 @@ export class RepositoryService {
       .exec();
   }
 
-  async findRemoteRepositories(githubId: number) {
+  async findRemoteRepositories(githubId: string) {
     const user = await this.userService.findOneByGithubId(githubId);
+
+    if (!user) {
+      throw new Error('User not found');
+    }
 
     const response = await this.httpService.axiosRef
       .get('https://api.github.com/user/repos', {
         headers: {
-          Authorization: `Bearer ${user?.github_token}`,
+          Authorization: `Bearer ${user.encrypted_token}`,
           Accept: 'application/vnd.github.v3+json',
         },
       })
@@ -56,24 +60,18 @@ export class RepositoryService {
 
     const repositoriesInserted: Repository[] = repositoriesFiltered.map(
       (repository: GithubRepositoryResponse) => ({
-        repository_id: String(repository.id),
-        repository_name: repository.name,
-        repository_full_name: repository.full_name,
-        description: repository.description,
-        github_html_url: repository.html_url,
+        user_id: user._id as ObjectId,
+        gh_repository_id: String(repository.id),
+        name: repository.name,
+        repo_fullname: repository.full_name,
+        url: repository.html_url,
         is_private: repository.private,
-        is_fork: repository.fork,
-        is_archived: repository.archived,
-        is_disabled: repository.disabled,
-        is_template: repository.is_template,
-        visibility: repository.visibility,
-        user_permissions: repository.permissions,
-        user_id: repository.owner.id,
+        created_at: new Date(repository.created_at),
+        updated_at: new Date(repository.updated_at),
       }),
     );
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-    const existingRepositories = await this.findAll(user?.github_id!);
+    const existingRepositories = await this.findAll(user.github_id);
 
     // TODO: validate user repositories, insert new ones;
     // if the user already has repositories, we don't need to insert them again
@@ -86,7 +84,7 @@ export class RepositoryService {
     repositoriesInserted.forEach(repository => {
       if (
         !existingRepositories.find(
-          r => r.repository_id === repository.repository_id,
+          r => r.gh_repository_id === repository.gh_repository_id,
         )
       ) {
         this.create(repository);
