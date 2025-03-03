@@ -2,6 +2,7 @@ import { IsPublic } from '@/common/decorators/is-public.decorator';
 import { Controller, Get, HttpStatus, Query, Res } from '@nestjs/common';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
+import { Buffer } from 'node:buffer';
 import { GithubService } from './github.service';
 
 @ApiTags('Github OAuth')
@@ -24,25 +25,23 @@ export class GithubController {
   })
   @Get('')
   autorization(
-    @Res({ passthrough: true }) response: Response,
+    @Res() response: Response,
     @Query('client_type') clientType: 'web' | 'extension' = 'web',
     @Query('redirect_uri') redirectUri: string = '',
   ) {
     const stateData = { client_type: clientType, redirect_uri: redirectUri };
-    const state = Buffer.from(JSON.stringify(stateData)).toString('base64');
+    const state = Buffer.from(JSON.stringify(stateData)).toString('base64url');
 
     const autorizationUrl = this.githubService.authorization(state);
 
-    return response.status(HttpStatus.OK).json({
-      url: autorizationUrl,
-    });
+    return response.status(HttpStatus.OK).json({ url: autorizationUrl });
   }
 
   @IsPublic()
   @ApiQuery({ name: 'code', type: String })
   @Get('callback')
   async callback(
-    @Res({ passthrough: true }) response: Response,
+    @Res() response: Response,
     @Query('code') code: string,
     @Query('state') state: string,
   ) {
@@ -55,7 +54,7 @@ export class GithubController {
     };
 
     if (stateDecoded.client_type !== 'web') {
-      response.status(HttpStatus.OK).json({
+      return response.status(HttpStatus.OK).json({
         access_token: token,
       });
     } else {
@@ -66,7 +65,7 @@ export class GithubController {
         maxAge: 1000 * 60 * 60 * 24 * 7,
       });
 
-      response.redirect(stateDecoded.redirect_uri);
+      return response.redirect(stateDecoded.redirect_uri);
     }
   }
 }
