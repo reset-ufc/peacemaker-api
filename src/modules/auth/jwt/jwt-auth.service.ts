@@ -1,4 +1,4 @@
-import { User } from '@/modules/user/entities/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './entities/jwt.entity';
@@ -18,12 +18,15 @@ export class JwtAuthService {
 
   login(user: User) {
     const payload: JwtPayload = {
-      sub: String(user.github_id),
+      sub: user.github_id,
       iat: Date.now(),
       exp: Date.now() + 1000 * 60 * 60 * 24 * 7, // 1 semana
       user: {
-        name: user.name,
         github_id: user.github_id,
+        name: user.name,
+        username: user.username,
+        avatar_url: user.avatar_url!,
+        email: user.email || '',
       },
     };
 
