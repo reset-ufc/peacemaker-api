@@ -47,12 +47,12 @@ export class GithubService {
       encrypted_token: accessTokenResponse.access_token,
     });
 
-    const { accessToken } = this.jwtAuthService.login(user);
+    const token = this.jwtAuthService.login(user);
 
-    return accessToken;
+    return token.accessToken;
   }
 
-  public authorization(state: string = 'web') {
+  public authorization(state: string) {
     const githubClientId = this.configService.get<string>(
       'auth.github.clientId',
     )!;
@@ -65,9 +65,7 @@ export class GithubService {
       this.configService.get<string>('auth.github.scope')!,
     );
 
-    const authorizationUrl = `https://github.com/login/oauth/authorize?client_id=${githubClientId}&response_type=code&scope=${githubScope}&redirect_uri=${redirectUri}&state=${state}`;
-
-    return authorizationUrl;
+    return `https://github.com/login/oauth/authorize?client_id=${githubClientId}&response_type=code&scope=${githubScope}&redirect_uri=${redirectUri}&state=${state}`;
   }
 
   private async accessToken(code: string) {
@@ -77,7 +75,7 @@ export class GithubService {
     const githubSecret = this.configService.get<string>(
       'auth.github.clientSecret',
     );
-    const githubState = this.configService.get<string>('auth.github.scope');
+    const githubScope = this.configService.get<string>('auth.github.scope');
 
     try {
       const response = await this.httpService.axiosRef.post(
@@ -86,7 +84,7 @@ export class GithubService {
           client_id: githubClientId,
           client_secret: githubSecret,
           code,
-          state: githubState,
+          scope: githubScope,
         },
         {
           headers: {
