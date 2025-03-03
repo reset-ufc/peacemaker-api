@@ -1,0 +1,31 @@
+services:
+  backend:
+    container_name: peacemaker-api-backend
+
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+      target: production
+      args:
+        - NEST_API_PORT=${NEST_API_PORT}
+        - NEST_API_SERVER_URL=${NEST_API_SERVER_URL}
+        - JWT_SECRET=${JWT_SECRET}
+        - JWT_EXPIRATION_TIME_SECONDS=${JWT_EXPIRATION_TIME_SECONDS}
+        - MONGODB_DATABASE_URL=${MONGODB_DATABASE_URL}
+
+    env_file:
+      - ../.env
+
+    restart: on-failure
+
+    ports:
+      - "3000:3000"
+
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.5"
+        reservations:
+          memory: 256M
+          cpus: "0.25"

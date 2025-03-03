@@ -1,50 +1,37 @@
 services:
-  # mongodb:
-  #   image: bitnami/mongodb
-  #   container_name: peacemaker-mongodb
-  #   environment:
-  #     - MONGO_INITDB_DATABASE=peacemaker
-  #     - MONGO_INITDB_ROOT_USERNAME=ghbot
-  #     - MONGO_INITDB_ROOT_PASSWORD=my-secure-password
-  #   volumes:
-  #     - mongodb_data:/bitnami/mongodb
-  #   ports:
-  #     - 27017:27017
-  #   networks:
-  #     - peacemaker-network
+  mongodb:
+    image: bitnami/mongodb:8.0
+    restart: on-failure
 
-  backend:
-    container_name: peacemaker-backend
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        - NEST_API_PORT=${NEST_API_PORT}
-        - NEST_API_SERVER_URL=${NEST_API_SERVER_URL}
-        - JWT_SECRET=${JWT_SECRET}
-        - JWT_EXPIRATION_TIME_SECONDS=${JWT_EXPIRATION_TIME_SECONDS}
-        - GITHUB_APP_ID=${GITHUB_APP_ID}
-        - GITHUB_APP_INSTALLATION=${GITHUB_APP_INSTALLATION}
-        - GITHUB_OAUTH_CLIENT_ID=${GITHUB_OAUTH_CLIENT_ID}
-        - GITHUB_OAUTH_CLIENT_SECRET=${GITHUB_OAUTH_CLIENT_SECRET}
-        - GITHUB_OAUTH_CALLBACK_URL=${GITHUB_OAUTH_CALLBACK_URL}
-        - GITHUB_OAUTH_SCOPE=${GITHUB_OAUTH_SCOPE}
-        - GITHUB_OATH_PRIVATE_KEY_PATH=${GITHUB_OATH_PRIVATE_KEY_PATH}
-        - MONGODB_URI=${MONGODB_URI}
-        - PERSPECTIVE_API_SECRET=${PERSPECTIVE_API_SECRET}
-        - PERSPECTIVE_API_URL=${PERSPECTIVE_API_URL}
-        - GROQ_API_KEY=${GROQ_API_KEY}
-    env_file:
-      - '.env'
+    environment:
+      MONGODB_USERNAME: peacemaker
+      MONGODB_PASSWORD: peacemaker-password
+      MONGODB_ROOT_PASSWORD: my-secure-password
+      MONGODB_DATABASE: peacemakerbot
+
     ports:
-      - '3000:3000'
-    # depends_on:
-    #   - mongodb
-    networks:
-      - peacemaker-network
+      - "27017:27017"
+
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh mongo:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.5"
+        reservations:
+          memory: 256M
+          cpus: "0.25"
+
+    volumes:
+      - "mongo_data:/bitnami/mongodb"
+
 
 volumes:
-  mongodb_data:
-
-networks:
-  peacemaker-network:
+  mongo_data:
+    driver: local
