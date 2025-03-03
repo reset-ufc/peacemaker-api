@@ -1,5 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { apiReference } from '@scalar/nestjs-api-reference';
 
 export function setupSwagger(app: INestApplication): void {
   /**
@@ -10,16 +11,25 @@ export function setupSwagger(app: INestApplication): void {
   const config = new DocumentBuilder()
     .setTitle('Peacemaker API')
     .setDescription('Moderation GithubBot API')
-    .setVersion('0.0.1')
-    .addCookieAuth('access_token');
+    .setVersion('1.0')
+    .addBearerAuth();
 
   const documentFactory = () =>
     SwaggerModule.createDocument(app, config.build());
 
+  // Define Swagger documentation endpoint
   SwaggerModule.setup('docs', app, documentFactory, {
+    swaggerUiEnabled: false,
     jsonDocumentUrl: 'docs/openapi.json',
-    swaggerOptions: {
-      persistAuthorization: true,
-    },
   });
+
+  app.use(
+    '/reference',
+    apiReference({
+      theme: 'purple',
+      spec: {
+        url: 'docs/openapi.json',
+      },
+    }),
+  );
 }
