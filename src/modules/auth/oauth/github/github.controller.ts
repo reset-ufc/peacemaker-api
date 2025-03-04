@@ -49,7 +49,7 @@ export class GithubController {
   ) {
     const token = await this.githubService.callback(callbackQueryDto.code);
     const stateDecoded = JSON.parse(
-      Buffer.from(callbackQueryDto.state, 'base64').toString(),
+      Buffer.from(callbackQueryDto.state, 'base64url').toString(),
     ) as {
       client_type: string;
       redirect_uri: string;
