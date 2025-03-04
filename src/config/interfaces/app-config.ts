@@ -35,4 +35,13 @@ export interface AppConfig {
   'auth.github.clientSecret'?: string;
   'auth.github.callbackURL'?: string;
   'auth.github.scope'?: string;
+
+  'database.mongodb.name'?: string;
+  'database.mongodb.user'?: string;
+  'database.mongodb.password'?: string;
+  'database.mongodb.host'?: string;
+  'database.mongodb.url'?: string;
+
+  'server.url'?: string;
+  'server.port'?: number;
 }
