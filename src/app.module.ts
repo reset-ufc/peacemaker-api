@@ -14,14 +14,14 @@ import { CommentController } from './modules/comment/comment.controller';
 import { CommentModule } from './modules/comment/comment.module';
 import { RepositoryController } from './modules/repository/repository.controller';
 import { RepositoryModule } from './modules/repository/repository.module';
-import { UserController } from './modules/user/user.controller';
-import { UserModule } from './modules/user/user.module';
+import { UsersController } from './modules/users/users.controller';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
     ConfigSetupModule,
     CoreModule,
-    UserModule,
+    UsersModule,
     GithubModule,
     CommentModule,
     // TODO: Maybe we should delete this module
@@ -33,7 +33,7 @@ import { UserModule } from './modules/user/user.module';
     JwtAuthModule,
   ],
   controllers: [
-    UserController,
+    UsersController,
     GithubController,
     AnalyticsController,
     CommentController,

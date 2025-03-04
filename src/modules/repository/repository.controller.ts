@@ -1,4 +1,4 @@
-import { User } from '@/modules/user/entities/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { Controller, Get, Param, Req } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
