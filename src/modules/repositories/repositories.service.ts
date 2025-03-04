@@ -1,3 +1,4 @@
+import { decryptToken } from '@/common/utils/encrypt';
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -16,23 +17,36 @@ export class RepositoriesService {
     private readonly httpService: HttpService,
   ) {}
 
-  create(createRepositoryDto: CreateRepositoryDto) {
+  async create(createRepositoryDto: CreateRepositoryDto) {
     const repository = new this.repositoryModel(createRepositoryDto);
     return repository.save();
   }
 
-  findAll(githubId: string) {
-    return this.repositoryModel.find({ user_id: githubId }).exec();
+  async findAll(githubId: string): Promise<Repository[] | []> {
+    const repositories = await this.repositoryModel
+      .find({ gh_user_id: githubId })
+      .exec();
+
+    if (!repositories) {
+      return [];
+    }
+
+    return repositories;
   }
 
-  findOne(username: string, repository: string, githubId: string) {
-    const repositoryFullName = username + '/' + repository;
-    return this.repositoryModel
+  async findOne(repositoryName: string, githubId: string) {
+    const repository = await this.repositoryModel
       .findOne({
-        repository_full_name: repositoryFullName,
-        user_id: githubId,
+        name: repositoryName,
+        gh_user_id: githubId,
       })
       .exec();
+
+    if (!repository) {
+      return null;
+    }
+
+    return repository;
   }
 
   async findRemoteRepositories(githubId: string) {
@@ -42,10 +56,12 @@ export class RepositoriesService {
       throw new Error('User not found');
     }
 
+    const decrypt_token = await decryptToken(user.encrypted_token);
+
     const response = await this.httpService.axiosRef
       .get('https://api.github.com/user/repos', {
         headers: {
-          Authorization: `Bearer ${user.encrypted_token}`,
+          Authorization: `Bearer ${decrypt_token}`,
           Accept: 'application/vnd.github.v3+json',
         },
       })
@@ -55,12 +71,14 @@ export class RepositoriesService {
 
     // TODO: some privates repositories are not saved on the database
     const repositoriesFiltered = response.filter(
-      repository => repository.permissions.admin,
+      repository =>
+        repository.permissions.admin || repository.permissions.maintain,
     );
 
-    const repositoriesInserted: Repository[] = repositoriesFiltered.map(
+    const repositoriesToInsert: Repository[] = repositoriesFiltered.map(
       (repository: GithubRepositoryResponse) => ({
         user_id: user._id as ObjectId,
+        gh_user_id: String(repository.owner.id),
         gh_repository_id: String(repository.id),
         name: repository.name,
         repo_fullname: repository.full_name,
@@ -71,26 +89,22 @@ export class RepositoriesService {
       }),
     );
 
+    // Verifica quais repositórios já existem no MongoDB
     const existingRepositories = await this.findAll(user.github_id);
 
-    // TODO: validate user repositories, insert new ones;
-    // if the user already has repositories, we don't need to insert them again
-    if (existingRepositories.length > 0) {
-      return existingRepositories;
-    }
-
-    // validate if the user has all remote repositories on local database
-    // if not, we need to insert them
-    repositoriesInserted.forEach(repository => {
-      if (
-        !existingRepositories.find(
-          r => r.gh_repository_id === repository.gh_repository_id,
-        )
-      ) {
-        this.create(repository);
-      }
+    // Filtra apenas os que ainda não foram inseridos
+    const newRepositories = repositoriesToInsert.filter(repo => {
+      return !existingRepositories.some(
+        (existing: Repository) => existing.repo_fullname === repo.repo_fullname,
+      );
     });
 
-    return repositoriesInserted;
+    // Insere apenas os novos, se houver
+    if (newRepositories.length > 0) {
+      await this.repositoryModel.insertMany(newRepositories);
+    }
+
+    // Retorna a lista completa atualizada
+    return this.findAll(user.github_id);
   }
 }
