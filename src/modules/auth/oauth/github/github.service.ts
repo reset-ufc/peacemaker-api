@@ -23,7 +23,7 @@ export class GithubService {
 
     const user = await this.userService.findOneByGithubId(String(profile.id));
 
-    const encryptedToken = await encryptToken(accessTokenResponse.access_token);
+    const encryptedToken = encryptToken(accessTokenResponse.access_token);
 
     if (!user) {
       const createUserDto: CreateUserDto = {
@@ -38,8 +38,6 @@ export class GithubService {
       };
 
       const createdUser = await this.userService.create(createUserDto);
-
-      console.log('createdUser', createdUser);
 
       const { accessToken } = this.jwtAuthService.login(createdUser);
 
