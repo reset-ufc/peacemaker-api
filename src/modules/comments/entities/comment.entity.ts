@@ -7,6 +7,8 @@ import { Categories, CommentType } from './enums';
 
 export type CommentDocument = Comment & Document;
 
+// The GithubApp don't have access to the repository and user informations like the repository_id on ObjectId
+
 @Schema()
 export class Comment {
   @ApiProperty()
