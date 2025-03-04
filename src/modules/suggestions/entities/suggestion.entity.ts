@@ -13,6 +13,10 @@ export class Suggestion {
 
   @ApiProperty()
   @Prop({ required: true })
+  gh_comment_id: string;
+
+  @ApiProperty()
+  @Prop({ required: true })
   content: string;
 
   @ApiProperty()
