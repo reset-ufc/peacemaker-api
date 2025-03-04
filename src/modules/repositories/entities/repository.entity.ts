@@ -13,6 +13,10 @@ export class Repository {
 
   @ApiProperty()
   @Prop({ required: true })
+  gh_user_id: string;
+
+  @ApiProperty()
+  @Prop({ required: true })
   gh_repository_id: string;
 
   @ApiProperty()
