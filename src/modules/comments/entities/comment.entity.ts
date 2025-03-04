@@ -23,6 +23,10 @@ export class Comment {
 
   @ApiProperty()
   @Prop({ required: true })
+  repo_full_name: string;
+
+  @ApiProperty()
+  @Prop({ required: true })
   original_text: string;
 
   @ApiProperty()
@@ -44,10 +48,6 @@ export class Comment {
   @ApiProperty()
   @Prop({ required: true, enum: CommentType })
   comment_type: CommentType;
-
-  @ApiProperty()
-  @Prop({ default: Date.now })
-  created_at: Date;
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);
