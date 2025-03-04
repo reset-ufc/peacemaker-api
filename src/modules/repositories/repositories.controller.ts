@@ -1,6 +1,6 @@
-import { Controller, Get, Param, Req } from '@nestjs/common';
+import { Controller, Get, Param, Req, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { User } from '../users/entities/user.entity';
 import { RepositoriesService } from './repositories.service';
 
@@ -10,26 +10,56 @@ export class RepositoriesController {
   constructor(private readonly repositoryService: RepositoriesService) {}
 
   @Get()
-  async getAllRepositories(@Req() request: Request) {
+  async getAllRepositories(@Req() request: Request, @Res() response: Response) {
     const user = request?.user as User;
+
+    if (!user) {
+      return response.status(401).json({ message: 'Unauthorized' });
+    }
+
     const repositories = await this.repositoryService.findAll(user.github_id);
-    return { repositories };
+
+    return response.status(200).json(repositories);
   }
 
   @Get('remote')
-  getRepositoriesFromRemote(@Req() request: Request) {
+  async getRepositoriesFromRemote(
+    @Req() request: Request,
+    @Res() response: Response,
+  ) {
     const user = request?.user as User;
 
-    return this.repositoryService.findRemoteRepositories(user.github_id);
+    if (!user) {
+      return response.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const repositories = await this.repositoryService.findRemoteRepositories(
+      user.github_id,
+    );
+
+    return response.status(200).json(repositories);
   }
 
   @Get(':repository')
-  getRepository(
+  async getRepository(
     @Req() request: Request,
-    @Param('username') username: string,
-    @Param('repository') repository: string,
+    @Param('repository') repositoryName: string,
+    @Res() response: Response,
   ) {
     const user = request?.user as User;
-    return this.repositoryService.findOne(username, repository, user.github_id);
+
+    if (!user) {
+      return response.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const repository = await this.repositoryService.findOne(
+      repositoryName,
+      user.github_id,
+    );
+
+    console.log('repository: ', repository);
+
+    // TODO: Por algum motivo o repository não está sendo retornado
+    return response.status(200).json(repository);
   }
 }
