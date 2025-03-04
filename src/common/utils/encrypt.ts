@@ -1,6 +1,6 @@
 import { createCipheriv, createDecipheriv } from 'node:crypto';
 
-export async function encryptToken(content: string) {
+export function encryptToken(content: string) {
   const key = Buffer.from(process.env.ENCRYPTION_KEY as string, 'hex');
   const iv = Buffer.from(process.env.ENCRYPTION_IV as string, 'hex');
 
@@ -11,7 +11,7 @@ export async function encryptToken(content: string) {
   return encrypted;
 }
 
-export async function decryptToken(content: string) {
+export function decryptToken(content: string) {
   const key = Buffer.from(process.env.ENCRYPTION_KEY as string, 'hex');
   const iv = Buffer.from(process.env.ENCRYPTION_IV as string, 'hex');
 
