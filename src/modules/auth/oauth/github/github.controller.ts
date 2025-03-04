@@ -3,6 +3,7 @@ import { Controller, Get, HttpStatus, Query, Res } from '@nestjs/common';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { Buffer } from 'node:buffer';
+import { AuthorizationQueryDto, CallbackQueryDto } from './dto/queries.dto';
 import { GithubService } from './github.service';
 
 @ApiTags('Github OAuth')
@@ -26,10 +27,12 @@ export class GithubController {
   @Get('')
   autorization(
     @Res() response: Response,
-    @Query('client_type') clientType: 'web' | 'extension' = 'web',
-    @Query('redirect_uri') redirectUri: string = '',
+    @Query() authorizationQueryDto: AuthorizationQueryDto,
   ) {
-    const stateData = { client_type: clientType, redirect_uri: redirectUri };
+    const stateData = {
+      client_type: authorizationQueryDto.client_type,
+      redirect_uri: authorizationQueryDto.redirect_uri,
+    };
     const state = Buffer.from(JSON.stringify(stateData)).toString('base64url');
 
     const autorizationUrl = this.githubService.authorization(state);
@@ -42,12 +45,11 @@ export class GithubController {
   @Get('callback')
   async callback(
     @Res() response: Response,
-    @Query('code') code: string,
-    @Query('state') state: string,
+    @Query() callbackQueryDto: CallbackQueryDto,
   ) {
-    const token = await this.githubService.callback(code);
+    const token = await this.githubService.callback(callbackQueryDto.code);
     const stateDecoded = JSON.parse(
-      Buffer.from(state, 'base64').toString(),
+      Buffer.from(callbackQueryDto.state, 'base64').toString(),
     ) as {
       client_type: string;
       redirect_uri: string;
