@@ -12,7 +12,8 @@ export function setupSwagger(app: INestApplication): void {
     .setTitle('Peacemaker API')
     .setDescription('Moderation GithubBot API')
     .setVersion('1.0')
-    .addBearerAuth();
+    .addBearerAuth()
+    .addCookieAuth();
 
   const documentFactory = () =>
     SwaggerModule.createDocument(app, config.build());
