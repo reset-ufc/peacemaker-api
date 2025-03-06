@@ -1,5 +1,12 @@
 import { IsPublic } from '@/common/decorators/is-public.decorator';
-import { Controller, Get, HttpStatus, Query, Res } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  HttpStatus,
+  Query,
+  Res,
+} from '@nestjs/common';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { Buffer } from 'node:buffer';
@@ -33,6 +40,14 @@ export class GithubController {
       client_type: authorizationQueryDto.client_type,
       redirect_uri: authorizationQueryDto.redirect_uri,
     };
+
+    try {
+      new URL(stateData.redirect_uri);
+    } catch (error: any) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      throw new BadRequestException(error.message);
+    }
+
     const state = Buffer.from(JSON.stringify(stateData)).toString('base64url');
 
     const autorizationUrl = this.githubService.authorization(state);
@@ -55,11 +70,18 @@ export class GithubController {
       redirect_uri: string;
     };
 
-    if (stateDecoded.client_type !== 'web') {
-      return response.status(HttpStatus.OK).json({
-        access_token: token,
-      });
-    } else {
+    try {
+      new URL(stateDecoded.redirect_uri);
+    } catch (error: any) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      throw new BadRequestException(error.message);
+    }
+
+    if (stateDecoded.client_type === 'extension') {
+      return response.redirect(
+        `${stateDecoded.redirect_uri}?access_token=${token}`,
+      );
+    } else if (stateDecoded.client_type === 'web') {
       response.cookie('access_token', token, {
         httpOnly: true,
         secure: true,
@@ -68,6 +90,8 @@ export class GithubController {
       });
 
       return response.redirect(stateDecoded.redirect_uri);
+    } else {
+      return { access_token: token };
     }
   }
 }
