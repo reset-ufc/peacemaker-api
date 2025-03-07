@@ -3,8 +3,11 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import * as cookieParser from 'cookie-parser';
 
+import * as dotenv from 'dotenv';
 import { AppModule } from './app.module';
 import { CoreModule } from './core/core.module';
+
+dotenv.config();
 
 async function bootstrap() {
   // Create a new NestJS application instance using the AppModule
