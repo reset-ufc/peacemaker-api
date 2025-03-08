@@ -1,30 +1,78 @@
-import { IsBoolean, IsMongoId, IsNumber, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsDate,
+  IsMongoId,
+  IsNumber,
+  IsObject,
+  IsString,
+} from 'class-validator';
 import { Types } from 'mongoose';
 import { Comment } from '../entities/comment.entity';
-import { Categories, CommentType } from '../entities/enums';
+import { CommentType } from '../entities/enums';
 
 export class CreateCommentDto extends Comment {
-  @IsMongoId()
-  readonly repository_id: Types.ObjectId;
-
-  @IsMongoId()
-  readonly user_id: Types.ObjectId;
+  @IsString()
+  gh_comment_id: string;
 
   @IsString()
-  readonly gh_comment_id: string;
+  content: string;
+
+  @IsDate()
+  comment_created_at: Date;
 
   @IsString()
-  readonly original_text: string;
+  author_id: string;
 
-  @IsNumber()
-  readonly toxicity_score: number;
+  @IsObject()
+  parent: {
+    type: CommentType;
+    gh_parent_id: number;
+    title: string;
+    url: string;
+  };
+
+  @IsString()
+  repository_fullname: string;
 
   @IsBoolean()
-  readonly is_post_installation: boolean;
+  is_repository_private: boolean;
 
   @IsString()
-  readonly classification: Categories;
+  repository_owner: string;
+
+  @IsNumber()
+  toxicity_score: number;
+
+  @IsDate()
+  toxicity_analyzed_at: Date;
+
+  @IsBoolean()
+  flagged: boolean;
 
   @IsString()
-  readonly comment_type: CommentType;
+  classification: string;
+
+  @IsBoolean()
+  solutioned: boolean;
+
+  @IsString()
+  solution: string;
+
+  @IsDate()
+  solution_analyzed_at: Date;
+
+  @IsMongoId()
+  solution_id: Types.ObjectId;
+
+  @IsString()
+  event_type: string;
+
+  @IsNumber()
+  installation_id: number;
+
+  @IsBoolean()
+  moderated: boolean;
+
+  @IsString()
+  moderation_action: string;
 }
