@@ -1,4 +1,3 @@
-import { encryptToken } from '@/common/utils/encrypt';
 import { JwtAuthService } from '@/modules/auth/jwt/jwt-auth.service';
 import { CreateUserDto } from '@/modules/users/dto/create-user.dto';
 import { UsersService } from '@/modules/users/users.service';
@@ -23,7 +22,7 @@ export class GithubService {
 
     const user = await this.userService.findOneByGithubId(String(profile.id));
 
-    const encryptedToken = encryptToken(accessTokenResponse.access_token);
+    // const encryptedToken = encryptToken(accessTokenResponse.access_token);
 
     if (!user) {
       const createUserDto: CreateUserDto = {
@@ -32,7 +31,7 @@ export class GithubService {
         name: profile.name,
         username: profile.login,
         avatar_url: profile.avatar_url,
-        encrypted_token: encryptedToken,
+        encrypted_token: accessTokenResponse.access_token,
         threshold: 7,
         temperature: 0,
       };
@@ -44,9 +43,9 @@ export class GithubService {
       return accessToken;
     }
 
-    await this.userService.updateByGithubId(String(profile.id), {
-      encrypted_token: encryptedToken,
-    });
+    // await this.userService.updateByGithubId(String(profile.id), {
+    //   encrypted_token: encryptedToken,
+    // });
 
     const token = this.jwtAuthService.login(user);
 
