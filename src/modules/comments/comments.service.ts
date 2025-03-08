@@ -40,7 +40,7 @@ export class CommentsService {
 
     try {
       const response = await this.httpService.axiosRef.patch(
-        `https://api.github.com/repos/${comment.repo_full_name}/issues/comments/${encodeURIComponent(commentId)}`,
+        `https://api.github.com/repos/${comment.repository_fullname}/issues/comments/${encodeURIComponent(commentId)}`,
         { body: suggestion.content },
         {
           headers: {
@@ -79,7 +79,7 @@ export class CommentsService {
 
   async findOne(id: string) {
     const comment = await this.commentModel.findOne({
-      comment_id: id,
+      gh_comment_id: id,
     });
 
     return comment;
