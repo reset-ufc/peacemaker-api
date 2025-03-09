@@ -41,10 +41,6 @@ export class RepositoriesService {
       })
       .exec();
 
-    if (!repository) {
-      return null;
-    }
-
     return repository;
   }
 
