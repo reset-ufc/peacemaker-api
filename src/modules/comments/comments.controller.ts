@@ -1,14 +1,18 @@
-import { IsPublic } from '@/common/decorators/is-public.decorator';
 import { Controller, Get, Param } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCookieAuth, ApiTags } from '@nestjs/swagger';
+import { SuggestionsService } from '../suggestions/suggestions.service';
 import { CommentsService } from './comments.service';
 
 @ApiTags('Comments')
+@ApiCookieAuth()
+@ApiBearerAuth()
 @Controller('comments')
 export class CommentsController {
-  constructor(private readonly commentService: CommentsService) {}
+  constructor(
+    private readonly commentService: CommentsService,
+    private readonly suggestionsService: SuggestionsService,
+  ) {}
 
-  @IsPublic()
   @Get('')
   async getComments() {
     const comments = await this.commentService.findAll();
@@ -16,18 +20,13 @@ export class CommentsController {
     return { comments };
   }
 
-  @IsPublic()
-  @Get('repository/:repository_id')
-  async getCommentsByRepositoryId(
-    @Param('repository_id') repositoryId: string,
-  ) {
-    const comments =
-      await this.commentService.findAllByRepository(repositoryId);
+  @Get('/:comment_id/suggestions')
+  async getCommentsSuggestions(@Param('comment_id') commentId: string) {
+    const suggestions = await this.suggestionsService.findByComment(commentId);
 
-    return { comments };
+    return { suggestions };
   }
 
-  @IsPublic()
   @Get(':id')
   async getComment(@Param('id') id: string) {
     const comment = await this.commentService.findOne(id);
