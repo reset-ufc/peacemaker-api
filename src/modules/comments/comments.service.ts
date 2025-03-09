@@ -20,28 +20,32 @@ export class CommentsService {
     private readonly httpService: HttpService,
   ) {}
 
-  async editComment(token: string, username: string, commentId: string) {
+  // TODO: Precisa refatorar pensando em como o usuário tratará de editar na interface
+  // e.g: Usuário edita uma sugestão e clica em enviar, como mapear que ela foi editada?
+  // Se o usuário não edita, quais informações são enviadas?
+
+  async editComment(token: string, githubAuthorId: string, commentId: string) {
     const comment = await this.commentModel.findOne({
-      comment_id: commentId,
-      login: username,
+      gh_comment_id: commentId,
+      author_id: githubAuthorId,
     });
 
     if (!comment) {
       throw new Error('Comment not found');
     }
 
-    const suggestion = await this.suggestionModel.findOne({
-      comment_id: commentId,
+    const suggestions = await this.suggestionModel.findOne({
+      gh_comment_id: commentId,
     });
 
-    if (!suggestion) {
+    if (!suggestions) {
       throw new NotFoundException('Suggestion not found');
     }
 
     try {
       const response = await this.httpService.axiosRef.patch(
         `https://api.github.com/repos/${comment.repository_fullname}/issues/comments/${encodeURIComponent(commentId)}`,
-        { body: suggestion.content },
+        { body: 'Esse comentário foi editado pelo usuário.' },
         {
           headers: {
             Authorization: `Bearer ${token}`,
