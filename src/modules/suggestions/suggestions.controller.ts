@@ -20,11 +20,4 @@ export class SuggestionsController {
 
     return suggestion;
   }
-
-  @Get('repository/:repositoryId')
-  getAllByRepository(@Param('repositoryId') repositoryId: string) {
-    const suggestions = this.suggestionService.getAllByRepository(repositoryId);
-
-    return suggestions;
-  }
 }
