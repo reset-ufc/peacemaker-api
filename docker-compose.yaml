@@ -10,7 +10,7 @@ services:
       MONGODB_DATABASE: peacemakerbot
 
     ports:
-      - "27017:27017"
+      - '27017:27017'
 
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh mongo:27017/test --quiet
@@ -23,14 +23,13 @@ services:
       resources:
         limits:
           memory: 512M
-          cpus: "0.5"
+          cpus: '0.5'
         reservations:
           memory: 256M
-          cpus: "0.25"
+          cpus: '0.25'
 
     volumes:
-      - "mongo_data:/bitnami/mongodb"
-
+      - 'mongo_data:/bitnami/mongodb'
 
 volumes:
   mongo_data:
