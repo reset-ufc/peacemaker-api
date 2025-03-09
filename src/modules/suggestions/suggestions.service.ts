@@ -16,9 +16,9 @@ export class SuggestionsService {
     return suggestions;
   }
 
-  async getAllByRepository(repositoryId: string): Promise<Suggestion[] | []> {
+  async findByComment(commentId: string): Promise<Suggestion[] | []> {
     const suggestions = await this.suggestionModel
-      .find({ repository_id: repositoryId })
+      .find({ gh_comment_id: commentId })
       .exec();
 
     return suggestions;
