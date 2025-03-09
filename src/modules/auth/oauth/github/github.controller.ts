@@ -83,7 +83,7 @@ export class GithubController {
       );
     } else if (stateDecoded.client_type === 'web') {
       response.cookie('access_token', token, {
-        httpOnly: true,
+        httpOnly: false,
         secure: true,
         sameSite: 'lax',
         maxAge: 1000 * 60 * 60 * 24 * 7,
