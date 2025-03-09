@@ -40,10 +40,10 @@ export class RepositoriesController {
     return response.status(200).json(repositories);
   }
 
-  @Get(':repository')
+  @Get(':repositoryName')
   async getRepository(
     @Req() request: Request,
-    @Param('repository') repositoryName: string,
+    @Param('repositoryName') repositoryName: string,
     @Res() response: Response,
   ) {
     const user = request?.user as User;
@@ -56,8 +56,6 @@ export class RepositoriesController {
       repositoryName,
       user.github_id,
     );
-
-    console.log('repository: ', repository);
 
     // TODO: Por algum motivo o repository não está sendo retornado
     return response.status(200).json(repository);
