@@ -5,12 +5,14 @@ import {
   Suggestion,
   SuggestionSchema,
 } from '../suggestions/entities/suggestion.entity';
+import { SuggestionsModule } from '../suggestions/suggestions.module';
 import { CommentsController } from './comments.controller';
 import { CommentsService } from './comments.service';
 import { Comment, CommentSchema } from './entities/comment.entity';
 
 @Module({
   imports: [
+    SuggestionsModule,
     HttpModule,
     MongooseModule.forFeature([
       {
