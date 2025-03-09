@@ -1,4 +1,3 @@
-import { decryptToken } from '@/common/utils/encrypt';
 import { HttpService } from '@nestjs/axios';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -56,12 +55,12 @@ export class RepositoriesService {
       throw new NotFoundException('User not found');
     }
 
-    const decrypt_token = decryptToken(user.encrypted_token);
+    // const decrypt_token = decryptToken(user.encrypted_token);
 
     const response = await this.httpService.axiosRef
       .get('https://api.github.com/user/repos', {
         headers: {
-          Authorization: `Bearer ${decrypt_token}`,
+          Authorization: `Bearer ${user.encrypted_token}`,
           Accept: 'application/vnd.github.v3+json',
         },
       })
