@@ -1,16 +1,16 @@
-import { IsBoolean, IsString } from 'class-validator';
-import { Types } from 'mongoose';
+import { IsBoolean, IsNumber, IsObject, IsString } from 'class-validator';
 import { Suggestion } from '../entities/suggestion.entity';
 
 export class CreateSuggestionDto extends Suggestion {
-  readonly comment_id: Types.ObjectId;
-
-  @IsString()
-  readonly text: string;
-
   @IsBoolean()
   readonly is_edited: boolean;
 
-  @IsBoolean()
-  readonly is_selected: boolean;
+  @IsString()
+  gh_comment_id: string;
+
+  @IsNumber()
+  suggestion_selected_index: number;
+
+  @IsObject()
+  suggestions: { content: string }[];
 }
