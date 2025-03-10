@@ -56,7 +56,8 @@ export class GithubController {
   }
 
   @IsPublic()
-  @ApiQuery({ name: 'code', type: String })
+  @ApiQuery({ name: 'code', type: String, required: true })
+  @ApiQuery({ name: 'state', type: String, required: true })
   @Get('callback')
   async callback(
     @Res() response: Response,
