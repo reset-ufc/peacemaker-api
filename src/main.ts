@@ -1,4 +1,4 @@
-import { ValidationPipe } from '@nestjs/common';
+import { ForbiddenException, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import * as cookieParser from 'cookie-parser';
@@ -19,7 +19,7 @@ async function bootstrap() {
    *   - Allow credentials (cookies, authentication headers) to be sent with requests
    *   - Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
    */
-  const allowlist = [
+  const allowedOrigins = [
     'http://localhost:3001',
     'http://localhost:3000',
     'https://peacemaker-front-end.fly.dev',
@@ -27,17 +27,22 @@ async function bootstrap() {
   ];
 
   app.enableCors({
+    //todo: refactor to use CorsOptions
     origin: (origin, callback) => {
-      if (
-        !origin ||
-        allowlist.includes(origin) ||
-        origin.startsWith('chrome-extension://')
-      ) {
+      // allow requests with no origin (like mobile apps or curl requests)
+      if (!origin || origin.startsWith('chrome-extension://')) {
         console.log('Allowing CORS request from:', origin);
-        callback(null, true);
-      } else {
-        callback(new Error(`${origin} Not allowed by CORS`));
+        return callback(null, true);
       }
+      // Check origin for not allowed
+      if (!allowedOrigins.includes(origin)) {
+        console.error(
+          `The Origin header '${origin}' used in the request does not match the list of allowed origins.`,
+          'CorsConfigService',
+        );
+      }
+
+      return callback(new ForbiddenException(), false);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
