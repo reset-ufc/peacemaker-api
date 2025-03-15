@@ -57,21 +57,15 @@ export class CommentsController {
     if (!user) {
       return response.status(HttpStatus.UNAUTHORIZED).send();
     }
-    try {
-      const updatedComment = await this.commentService.editComment(
-        user.encrypted_token,
-        user.github_id,
-        commentId,
-        suggestionIndex,
-      );
-      return response.status(HttpStatus.OK).json(updatedComment);
-    } catch (error: any) {
-      return (
-        response
-          .status(HttpStatus.INTERNAL_SERVER_ERROR)
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          .json({ message: error })
-      );
-    }
+    const updatedComment = await this.commentService.editComment(
+      user.encrypted_token,
+      user.github_id,
+      commentId,
+      suggestionIndex,
+    );
+
+    return response.status(HttpStatus.OK).json({
+      comment: updatedComment,
+    });
   }
 }
