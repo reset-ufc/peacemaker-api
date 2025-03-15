@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   HttpStatus,
@@ -10,6 +11,7 @@ import {
 import { ApiBearerAuth, ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { SuggestionsService } from '../suggestions/suggestions.service';
+import { User } from '../users/entities/user.entity';
 import { CommentsService } from './comments.service';
 
 @ApiTags('Comments')
@@ -43,30 +45,33 @@ export class CommentsController {
     return { comment };
   }
 
-  @Patch(':comment_id/edit/:suggestionIndex')
+  @Patch(':comment_id/edit')
   async editComment(
     @Req() req: Request,
     @Param('comment_id') commentId: string,
-    @Param('suggestionIndex') suggestionIndex: number,
+    @Body('suggestionIndex') suggestionIndex: number,
     @Res() response: Response,
   ) {
-    const user = req.user as { token: string; github_id: string };
+    const user = req.user as User;
 
     if (!user) {
       return response.status(HttpStatus.UNAUTHORIZED).send();
     }
     try {
       const updatedComment = await this.commentService.editComment(
-        user.token,
+        user.encrypted_token,
         user.github_id,
         commentId,
         suggestionIndex,
       );
       return response.status(HttpStatus.OK).json(updatedComment);
-    } catch (error) {
-      return response
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: error.message });
+    } catch (error: any) {
+      return (
+        response
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          .json({ message: error })
+      );
     }
   }
 }
