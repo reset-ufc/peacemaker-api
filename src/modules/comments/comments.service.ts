@@ -1,9 +1,11 @@
 import { HttpService } from '@nestjs/axios';
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { AxiosError } from 'axios';
 import { Model } from 'mongoose';
@@ -18,43 +20,71 @@ export class CommentsService {
     @InjectModel(Suggestion.name)
     private readonly suggestionModel: Model<Suggestion>,
     private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
   ) {}
 
   // TODO: Precisa refatorar pensando em como o usuário tratará de editar na interface
   // e.g: Usuário edita uma sugestão e clica em enviar, como mapear que ela foi editada?
   // Se o usuário não edita, quais informações são enviadas?
 
-  async editComment(token: string, githubAuthorId: string, commentId: string) {
+  async editComment(
+    token: string,
+    githubAuthorId: string,
+    commentId: string,
+    suggestionIndex: number,
+  ): Promise<GithubResponse> {
     const comment = await this.commentModel.findOne({
       gh_comment_id: commentId,
       author_id: githubAuthorId,
     });
-
     if (!comment) {
-      throw new Error('Comment not found');
+      throw new NotFoundException('Comment not found');
     }
 
-    const suggestions = await this.suggestionModel.findOne({
+    const suggestionDoc = await this.suggestionModel.findOne({
       gh_comment_id: commentId,
     });
-
-    if (!suggestions) {
+    if (!suggestionDoc) {
       throw new NotFoundException('Suggestion not found');
     }
 
+    if (
+      suggestionIndex < 0 ||
+      suggestionIndex >= suggestionDoc.suggestions.length
+    ) {
+      throw new BadRequestException('Invalid suggestion index');
+    }
+    const suggestionToApply =
+      suggestionDoc.suggestions[suggestionIndex].content;
+
+    console.log(
+      'Token pessoal' +
+        this.configService.get<string>('auth.github.acessToken'),
+    );
+
+    const url = `https://api.github.com/repos/${comment.repository_fullname}/issues/comments/${encodeURIComponent(commentId)}`;
+
     try {
       const response = await this.httpService.axiosRef.patch(
-        `https://api.github.com/repos/${comment.repository_fullname}/issues/comments/${encodeURIComponent(commentId)}`,
-        { body: 'Esse comentário foi editado pelo usuário.' },
+        url,
+        { body: suggestionToApply },
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${this.configService.get<string>('auth.github.acessToken')}`,
             Accept: 'application/vnd.github+json',
           },
         },
       );
+      const responseData = response.data as GithubResponse;
 
-      const responseData = (await response.data) as unknown as GithubResponse;
+      console.log(responseData);
+
+      suggestionDoc.suggestion_selected_index = suggestionIndex;
+      await suggestionDoc.save();
+
+      comment.solutioned = true;
+      comment.solution = suggestionToApply;
+      await comment.save();
 
       return responseData;
     } catch (error) {
