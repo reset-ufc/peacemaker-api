@@ -21,7 +21,6 @@ export interface AppConfig {
     };
 
     github: {
-      acessToken: string;
       clientId: string;
       clientSecret: string;
       callbackURL: string;
@@ -32,7 +31,6 @@ export interface AppConfig {
   'auth.jwt.secret'?: string;
   'auth.jwt.expiresInSeconds'?: number;
 
-  'auth.github.acessToken'?: string;
   'auth.github.clientId'?: string;
   'auth.github.clientSecret'?: string;
   'auth.github.callbackURL'?: string;

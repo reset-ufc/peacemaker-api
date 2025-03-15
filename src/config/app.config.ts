@@ -22,7 +22,6 @@ export default (): AppConfig => ({
       expiresInSeconds: parseInt(process.env.JWT_EXPIRATION_TIME_SECONDS!, 10),
     },
     github: {
-      acessToken: process.env.GITHUB_OAUTH_ACCESS_TOKEN!,
       clientId: process.env.GITHUB_OAUTH_CLIENT_ID!,
       clientSecret: process.env.GITHUB_OAUTH_CLIENT_SECRET!,
       callbackURL: process.env.GITHUB_OAUTH_CALLBACK_URL!,
