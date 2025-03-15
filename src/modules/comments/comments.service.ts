@@ -57,11 +57,6 @@ export class CommentsService {
     const suggestionToApply =
       suggestionDoc.suggestions[suggestionIndex].content;
 
-    console.log(
-      'Token pessoal' +
-        this.configService.get<string>('auth.github.acessToken'),
-    );
-
     const url = `https://api.github.com/repos/${comment.repository_fullname}/issues/comments/${encodeURIComponent(commentId)}`;
 
     try {
@@ -70,7 +65,7 @@ export class CommentsService {
         { body: suggestionToApply },
         {
           headers: {
-            Authorization: `Bearer ${this.configService.get<string>('auth.github.acessToken')}`,
+            Authorization: `Bearer ${token}`,
             Accept: 'application/vnd.github+json',
           },
         },
