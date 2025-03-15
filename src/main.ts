@@ -29,20 +29,16 @@ async function bootstrap() {
   app.enableCors({
     //todo: refactor to use CorsOptions
     origin: (origin, callback) => {
-      // allow requests with no origin (like mobile apps or curl requests)
       if (!origin || origin.startsWith('chrome-extension://')) {
         console.log('Allowing CORS request from:', origin);
         return callback(null, true);
       }
-      // Check origin for not allowed
-      if (!allowedOrigins.includes(origin)) {
-        console.error(
-          `The Origin header '${origin}' used in the request does not match the list of allowed origins.`,
-          'CorsConfigService',
-        );
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        console.error(`Blocked CORS request from: ${origin}`);
+        return callback(new ForbiddenException('CORS Not Allowed'), false);
       }
-
-      return callback(new ForbiddenException(), false);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
