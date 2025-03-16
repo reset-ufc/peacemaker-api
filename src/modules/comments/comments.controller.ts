@@ -1,6 +1,17 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Param,
+  Patch,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiCookieAuth, ApiTags } from '@nestjs/swagger';
+import { Request, Response } from 'express';
 import { SuggestionsService } from '../suggestions/suggestions.service';
+import { User } from '../users/entities/user.entity';
 import { CommentsService } from './comments.service';
 
 @ApiTags('Comments')
@@ -32,5 +43,29 @@ export class CommentsController {
     const comment = await this.commentService.findOne(id);
 
     return { comment };
+  }
+
+  @Patch(':comment_id/edit')
+  async editComment(
+    @Req() req: Request,
+    @Param('comment_id') commentId: string,
+    @Body('suggestionIndex') suggestionIndex: number,
+    @Res() response: Response,
+  ) {
+    const user = req.user as User;
+
+    if (!user) {
+      return response.status(HttpStatus.UNAUTHORIZED).send();
+    }
+    const updatedComment = await this.commentService.editComment(
+      user.encrypted_token,
+      user.github_id,
+      commentId,
+      suggestionIndex,
+    );
+
+    return response.status(HttpStatus.OK).json({
+      comment: updatedComment,
+    });
   }
 }

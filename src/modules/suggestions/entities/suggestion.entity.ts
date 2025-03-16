@@ -10,10 +10,21 @@ export class Suggestion {
   @Prop({ required: true })
   gh_comment_id: string;
 
-  @ApiProperty()
-  @Prop({ required: true })
+  @ApiProperty({
+    description: 'Array de sugestões com o conteúdo e flag de rejeição',
+  })
+  @Prop({
+    required: true,
+    type: [
+      {
+        content: { type: String, required: true },
+        rejected: { type: Boolean, default: false },
+      },
+    ],
+  })
   suggestions: Array<{
-    content: string; // solução sugerida
+    content: string;
+    rejected?: boolean;
   }>;
 
   @ApiProperty()
@@ -27,6 +38,7 @@ export class Suggestion {
   @ApiProperty()
   @Prop({ default: Date.now })
   created_at: Date;
+  rejected: any;
 }
 
 export const SuggestionSchema = SchemaFactory.createForClass(Suggestion);
