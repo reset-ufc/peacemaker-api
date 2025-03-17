@@ -16,8 +16,8 @@ export class Feedback {
   is_useful: boolean;
 
   @ApiProperty()
-  @Prop({ required: true })
-  justification: string;
+  @Prop({ required: false })
+  justification?: string;
 
   @ApiProperty()
   @Prop({ default: Date.now })
