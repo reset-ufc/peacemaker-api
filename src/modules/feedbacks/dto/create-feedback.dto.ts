@@ -1,13 +1,18 @@
-import { IsBoolean, IsString } from 'class-validator';
-import { Types } from 'mongoose';
-import { Feedback } from '../entities/feedback.entity';
+import { IsBoolean, IsNotEmpty, IsString, ValidateIf } from 'class-validator';
 
-export class CreateFeedbackDto extends Feedback {
-  readonly suggestion_id: Types.ObjectId;
+export class CreateFeedbackDto {
+  @IsString()
+  @IsNotEmpty()
+  suggestion_id: string;
 
   @IsBoolean()
-  readonly is_useful: boolean;
+  is_useful: boolean;
 
+  // Se o feedback não for útil, a justificativa é obrigatória
+  @ValidateIf(o => o.is_useful === false)
   @IsString()
-  readonly justification: string;
+  @IsNotEmpty({
+    message: 'Justification is required when feedback is not useful',
+  })
+  justification?: string;
 }
