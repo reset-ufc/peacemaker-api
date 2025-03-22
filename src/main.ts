@@ -1,8 +1,9 @@
-import { ForbiddenException, ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import * as cookieParser from 'cookie-parser';
 
+import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import * as dotenv from 'dotenv';
 import { AppModule } from './app.module';
 import { CoreModule } from './core/core.module';
@@ -19,34 +20,38 @@ async function bootstrap() {
    *   - Allow credentials (cookies, authentication headers) to be sent with requests
    *   - Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
    */
-  const allowedOrigins = [
-    'http://localhost:3001',
-    'http://localhost:3000',
-    'https://peacemaker-front-end.fly.dev',
-    'https://github.com',
-  ];
+  // const allowedOrigins = [
+  //   'http://localhost:3001',
+  //   'http://localhost:3000',
+  //   'https://peacemaker-front-end.fly.dev',
+  //   'https://github.com',
+  // ];
 
   app.enableCors({
+    allowedHeaders: ['Content-Type', 'Authorization'],
     //todo: refactor to use CorsOptions
-    origin: (origin, callback) => {
-      // allow requests with no origin (like mobile apps or curl requests)
-      if (!origin || origin.startsWith('chrome-extension://')) {
-        console.log('Allowing CORS request from:', origin);
-        return callback(null, true);
-      }
-      // Check origin for not allowed
-      if (!allowedOrigins.includes(origin)) {
-        console.error(
-          `The Origin header '${origin}' used in the request does not match the list of allowed origins.`,
-          'CorsConfigService',
-        );
-      }
+    // origin: (origin, callback) => {
+    //   // allow requests with no origin (like mobile apps or curl requests)
+    //   if (!origin || origin.startsWith('chrome-extension://')) {
+    //     console.log('Allowing CORS request from:', origin);
+    //     return callback(null, true);
+    //   }
+    //   // Check origin for not allowed
+    //   if (!allowedOrigins.includes(origin)) {
+    //     console.error(
+    //       `The Origin header '${origin}' used in the request does not match the list of allowed origins.`,
+    //       'CorsConfigService',
+    //     );
+    //   }
 
-      return callback(new ForbiddenException(), false);
-    },
+    //   return callback(new ForbiddenException(), false);
+    // },
+
+    origin: true,
     credentials: true,
+
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-  });
+  } as CorsOptions);
 
   app.use(cookieParser());
 
