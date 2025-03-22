@@ -20,11 +20,11 @@ export class JwtAuthService {
     const nowInSeconds = Math.floor(Date.now() / 1000);
 
     const payload: JwtPayload = {
-      sub: user.github_id,
+      sub: user.gh_user_id,
       iat: nowInSeconds,
       exp: nowInSeconds + 60 * 60 * 24 * 7, // 1 semana em segundos
       user: {
-        github_id: user.github_id,
+        github_id: user.gh_user_id,
         name: user.name,
         username: user.username,
         avatar_url: user.avatar_url!,

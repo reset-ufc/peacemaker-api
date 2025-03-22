@@ -1,16 +1,16 @@
-import { IsBoolean, IsNumber, IsObject, IsString } from 'class-validator';
-import { Suggestion } from '../entities/suggestion.entity';
+import { IsBoolean, IsDateString, IsString } from 'class-validator';
+import { Suggestions } from '../entities/suggestion.entity';
 
-export class CreateSuggestionDto extends Suggestion {
-  @IsBoolean()
-  readonly is_edited: boolean;
-
+export class CreateSuggestionDto extends Suggestions {
   @IsString()
   gh_comment_id: string;
 
-  @IsNumber()
-  suggestion_selected_index: number;
+  @IsString()
+  content: string;
 
-  @IsObject()
-  suggestions: { content: string }[];
+  @IsBoolean()
+  is_edited: boolean;
+
+  @IsDateString()
+  created_at: Date;
 }

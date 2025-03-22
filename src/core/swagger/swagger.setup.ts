@@ -10,8 +10,8 @@ export function setupSwagger(app: INestApplication): void {
    */
   const config = new DocumentBuilder()
     .setTitle('Peacemaker API')
-    .setDescription('Moderation GithubBot API')
-    .setVersion('1.0')
+    .setDescription('')
+    .setVersion('1.0.0')
     .addBearerAuth()
     .addCookieAuth();
 

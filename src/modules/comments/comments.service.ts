@@ -1,116 +1,180 @@
+import { Suggestions } from '@/modules/suggestions/entities/suggestion.entity';
+import { User } from '@/modules/users/entities/user.entity';
 import { HttpService } from '@nestjs/axios';
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { InjectModel } from '@nestjs/mongoose';
-import { AxiosError } from 'axios';
-import { Model } from 'mongoose';
-import { Suggestion } from '../suggestions/entities/suggestion.entity';
-import { Comment } from './entities/comment.entity';
-import { GithubResponse } from './entities/github-reponse.entity';
+import { Model, PipelineStage } from 'mongoose';
+import { AcceptCommentSuggestionDto } from './dto/accept-suggestion.dto';
+import { UpdateCommentDto } from './dto/update-comment.dto';
+import { EditCommentEvent } from './edit-comment.event';
+import { Comments } from './entities/comment.entity';
 
 @Injectable()
 export class CommentsService {
   constructor(
-    @InjectModel(Comment.name) private readonly commentModel: Model<Comment>,
-    @InjectModel(Suggestion.name)
-    private readonly suggestionModel: Model<Suggestion>,
+    @InjectModel(Comments.name) private readonly commentsModel: Model<Comments>,
+    @InjectModel(Suggestions.name)
+    private readonly suggestionsModel: Model<Suggestions>,
+    @InjectModel(User.name) private readonly userModel: Model<User>,
     private readonly httpService: HttpService,
-    private readonly configService: ConfigService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  // TODO: Precisa refatorar pensando em como o usuário tratará de editar na interface
-  // e.g: Usuário edita uma sugestão e clica em enviar, como mapear que ela foi editada?
-  // Se o usuário não edita, quais informações são enviadas?
+  async findAll(userId: string) {
+    // Base aggregation pipeline
+    const pipeline: Array<PipelineStage> = [
+      {
+        $match: {
+          gh_comment_sender_id: userId,
+        },
+      },
+      {
+        $lookup: {
+          from: 'parents',
+          localField: 'gh_comment_id',
+          foreignField: 'comment_id',
+          as: 'parent',
+        },
+      },
+      {
+        $unwind: {
+          path: '$parent',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'suggestions',
+          localField: 'gh_comment_id',
+          foreignField: 'gh_comment_id',
+          as: 'suggestions',
+        },
+      },
+    ];
 
-  async editComment(
-    token: string,
-    githubAuthorId: string,
+    // Execute aggregation pipeline
+    const results = await this.commentsModel.aggregate(pipeline).exec();
+    return results;
+  }
+
+  async findOne(id: string, userId: string) {
+    // Base aggregation pipeline
+    const pipeline: Array<PipelineStage> = [
+      {
+        $match: {
+          gh_comment_id: id,
+          gh_comment_sender_id: userId,
+        },
+      },
+      {
+        $lookup: {
+          from: 'parents',
+          localField: 'gh_comment_id',
+          foreignField: 'comment_id',
+          as: 'parent',
+        },
+      },
+      {
+        $unwind: {
+          path: '$parent',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'suggestions',
+          localField: 'gh_comment_id',
+          foreignField: 'gh_comment_id',
+          as: 'suggestions',
+        },
+      },
+    ];
+
+    // Execute aggregation pipeline
+    const results = await this.commentsModel.aggregate(pipeline).exec();
+    return results[0];
+  }
+
+  async update(
+    id: string,
+    userGithubId: string,
+    updateCommentDto: UpdateCommentDto,
+  ) {
+    const comment = await this.commentsModel.findOneAndUpdate(
+      {
+        gh_comment_id: id,
+        gh_comment_sender_id: userGithubId,
+      },
+      updateCommentDto,
+      {
+        new: true,
+      },
+    );
+
+    return comment;
+  }
+
+  async acceptCommentSuggestion(
     commentId: string,
-    suggestionIndex: number,
-  ): Promise<GithubResponse> {
-    const comment = await this.commentModel.findOne({
-      gh_comment_id: commentId,
-      author_id: githubAuthorId,
-    });
+    userGithubId: string,
+    suggestionId: string,
+    acceptCommentSuggestionDto: AcceptCommentSuggestionDto,
+  ) {
+    const comment = await this.findOne(commentId, userGithubId);
+
     if (!comment) {
-      throw new NotFoundException('Comment not found');
+      return null;
     }
 
-    const suggestionDoc = await this.suggestionModel.findOne({
+    const user = await this.userModel.findOne({ gh_user_id: userGithubId });
+
+    if (!user) {
+      return null;
+    }
+
+    const suggestionDoc = await this.suggestionsModel.findOne({
       gh_comment_id: commentId,
+      _id: suggestionId,
     });
+
     if (!suggestionDoc) {
-      throw new NotFoundException('Suggestion not found');
+      return null;
     }
 
-    if (
-      suggestionIndex < 0 ||
-      suggestionIndex >= suggestionDoc.suggestions.length
-    ) {
-      throw new BadRequestException('Invalid suggestion index');
-    }
-    const suggestionToApply =
-      suggestionDoc.suggestions[suggestionIndex].content;
+    this.eventEmitter.emit(
+      'comment_suggestion.accepted',
+      new EditCommentEvent(
+        comment.gh_repository_owner,
+        comment.gh_repository_name,
+        comment.gh_comment_id,
+        suggestionDoc.content,
+        user.encrypted_token,
+        acceptCommentSuggestionDto,
+      ),
+    );
+  }
 
-    const url = `https://api.github.com/repos/${comment.repository_fullname}/issues/comments/${encodeURIComponent(commentId)}`;
-
+  @OnEvent('comment_suggestion.accepted')
+  async commentEdit(event: EditCommentEvent) {
     try {
       const response = await this.httpService.axiosRef.patch(
-        url,
-        { body: suggestionToApply },
+        `https://api.github.com/repos/${event.repositoryOwner}/${event.repositoryName}/issues/comments/${encodeURIComponent(event.commentId)}`,
+        { body: event.suggestionContent },
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${event.githubToken}`,
             Accept: 'application/vnd.github+json',
           },
         },
       );
-      const responseData = response.data as GithubResponse;
-
+      const responseData = response.data;
       console.log(responseData);
-
-      suggestionDoc.suggestion_selected_index = suggestionIndex;
-      await suggestionDoc.save();
-
-      comment.solutioned = true;
-      comment.solution = suggestionToApply;
-      await comment.save();
-
-      return responseData;
     } catch (error) {
-      if (error instanceof AxiosError) {
-        throw new InternalServerErrorException(
-          `Failed to update comment: ${error.message}`,
-        );
-      }
-      throw error;
+      console.error(error);
+      throw new InternalServerErrorException(
+        `Failed to update comment: ${error.message}`,
+      );
     }
-  }
-
-  async findAll() {
-    const allComments = await this.commentModel.find().exec();
-
-    return allComments;
-  }
-
-  async findAllByRepository(repositoryId: string) {
-    const commentsByRepository = await this.commentModel.find({
-      repository_id: repositoryId,
-    });
-
-    return commentsByRepository;
-  }
-
-  async findOne(id: string) {
-    const comment = await this.commentModel.findOne({
-      gh_comment_id: id,
-    });
-
-    return comment;
   }
 }

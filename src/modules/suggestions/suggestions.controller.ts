@@ -1,43 +1,15 @@
-import { Controller, Get, HttpStatus, Param, Patch, Res } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import { Response } from 'express';
+import { Body, Controller, Post } from '@nestjs/common';
+import { ApiBody } from '@nestjs/swagger';
+import { CreateFeedbackDto } from './dto/create-feedback.dto';
 import { SuggestionsService } from './suggestions.service';
 
-@ApiTags('Suggestions')
 @Controller('suggestions')
 export class SuggestionsController {
-  constructor(private readonly suggestionService: SuggestionsService) {}
+  constructor(private readonly suggestionsService: SuggestionsService) {}
 
-  @Get()
-  getAll() {
-    const suggestions = this.suggestionService.getAll();
-
-    return suggestions;
-  }
-
-  @Get(':id')
-  getById(@Param('id') id: string) {
-    const suggestion = this.suggestionService.getById(id);
-
-    return suggestion;
-  }
-
-  @Patch(':comment_id/reject/:suggestionIndex')
-  async rejectSuggestion(
-    @Param('comment_id') commentId: string,
-    @Param('suggestionIndex') suggestionIndex: number,
-    @Res() response: Response,
-  ) {
-    try {
-      const result = await this.suggestionService.rejectSuggestion(
-        commentId,
-        suggestionIndex,
-      );
-      return response.status(HttpStatus.OK).json(result);
-    } catch (error: any) {
-      return response
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ message: (error as Error).message });
-    }
+  @ApiBody({ type: CreateFeedbackDto })
+  @Post('feedback')
+  async feedback(@Body() createFeedbackDto: CreateFeedbackDto) {
+    return this.suggestionsService.feedback(createFeedbackDto);
   }
 }

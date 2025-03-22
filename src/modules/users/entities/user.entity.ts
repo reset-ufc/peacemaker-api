@@ -4,11 +4,21 @@ import { Document } from 'mongoose';
 
 export type UserDocument = User & Document;
 
+// Table users {
+//   gh_user_id            string  [note: "Identificador referente ao id do usuário no GitHub"]
+//   username         string
+//   name             string
+//   email            string
+//   avatar_url       string
+//   encripted_token  string
+//   created_at       datetime
+// }
+
 @Schema()
 export class User {
   @ApiProperty()
   @Prop({ required: true })
-  github_id: string;
+  gh_user_id: string;
 
   @ApiProperty()
   @Prop({ required: false })
@@ -31,12 +41,11 @@ export class User {
   encrypted_token: string;
 
   @ApiProperty()
-  @Prop({ required: false, default: 7 })
-  threshold: number;
-
-  @ApiProperty()
-  @Prop({ required: false, default: 0 })
-  temperature: number;
+  @Prop({
+    required: true,
+    default: Date.now,
+  })
+  created_at: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

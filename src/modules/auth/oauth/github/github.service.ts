@@ -26,14 +26,13 @@ export class GithubService {
 
     if (!user) {
       const createUserDto: CreateUserDto = {
-        github_id: String(profile.id),
+        gh_user_id: String(profile.id),
         email: profile.email,
         name: profile.name,
         username: profile.login,
         avatar_url: profile.avatar_url,
         encrypted_token: accessTokenResponse.access_token,
-        threshold: 7,
-        temperature: 0,
+        created_at: new Date(),
       };
 
       const createdUser = await this.userService.create(createUserDto);

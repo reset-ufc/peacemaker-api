@@ -2,43 +2,25 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { Document } from 'mongoose';
 
-export type SuggestionDocument = Suggestion & Document;
+export type SuggestionsDocument = Suggestions & Document;
 
 @Schema()
-export class Suggestion {
+export class Suggestions {
   @ApiProperty()
-  @Prop({ required: true })
+  @Prop({ required: true, type: String })
   gh_comment_id: string;
 
-  @ApiProperty({
-    description: 'Array de sugestões com o conteúdo e flag de rejeição',
-  })
-  @Prop({
-    required: true,
-    type: [
-      {
-        content: { type: String, required: true },
-        rejected: { type: Boolean, default: false },
-      },
-    ],
-  })
-  suggestions: Array<{
-    content: string;
-    rejected?: boolean;
-  }>;
+  @ApiProperty()
+  @Prop({ required: true, type: String })
+  content: string;
 
   @ApiProperty()
-  @Prop({ default: false })
+  @Prop({ required: true, type: Boolean, default: false })
   is_edited: boolean;
 
   @ApiProperty()
-  @Prop({ default: null })
-  suggestion_selected_index: number;
-
-  @ApiProperty()
-  @Prop({ default: Date.now })
+  @Prop({ required: true, type: Date })
   created_at: Date;
-  rejected: any;
 }
 
-export const SuggestionSchema = SchemaFactory.createForClass(Suggestion);
+export const SuggestionsSchema = SchemaFactory.createForClass(Suggestions);

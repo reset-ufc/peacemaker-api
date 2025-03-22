@@ -1,9 +1,9 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator';
-import { User } from '../entities/user.entity';
+import { User } from '@/modules/users/entities/user.entity';
+import { IsDate, IsOptional, IsString } from 'class-validator';
 
 export class CreateUserDto extends User {
   @IsString({ message: 'The Github ID is required' })
-  github_id: string;
+  gh_user_id: string;
 
   @IsOptional()
   @IsString()
@@ -22,9 +22,6 @@ export class CreateUserDto extends User {
   @IsString({ message: 'The Githubtoken is required' })
   encrypted_token: string;
 
-  @IsNumber({ allowInfinity: false, allowNaN: false })
-  threshold: number;
-
-  @IsNumber({ allowInfinity: false, allowNaN: false })
-  temperature: number;
+  @IsDate()
+  created_at: Date;
 }

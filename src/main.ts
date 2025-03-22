@@ -1,4 +1,4 @@
-import { ValidationPipe } from '@nestjs/common';
+import { ForbiddenException, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import * as cookieParser from 'cookie-parser';
@@ -27,28 +27,26 @@ async function bootstrap() {
   ];
 
   app.enableCors({
-    origin: '*',
+    //todo: refactor to use CorsOptions
+    origin: (origin, callback) => {
+      // allow requests with no origin (like mobile apps or curl requests)
+      if (!origin || origin.startsWith('chrome-extension://')) {
+        console.log('Allowing CORS request from:', origin);
+        return callback(null, true);
+      }
+      // Check origin for not allowed
+      if (!allowedOrigins.includes(origin)) {
+        console.error(
+          `The Origin header '${origin}' used in the request does not match the list of allowed origins.`,
+          'CorsConfigService',
+        );
+      }
+
+      return callback(new ForbiddenException(), false);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   });
-
-  // app.enableCors({
-  //   //todo: refactor to use CorsOptions
-  //   origin: (origin, callback) => {
-  //     if (!origin || origin.startsWith('chrome-extension://')) {
-  //       console.log('Allowing CORS request from:', origin);
-  //       return callback(null, true);
-  //     }
-  //     if (allowedOrigins.includes(origin)) {
-  //       return callback(null, true);
-  //     } else {
-  //       console.error(`Blocked CORS request from: ${origin}`);
-  //       return callback(new ForbiddenException('CORS Not Allowed'), false);
-  //     }
-  //   },
-  //   credentials: true,
-  //   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-  // });
 
   app.use(cookieParser());
 

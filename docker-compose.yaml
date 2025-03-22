@@ -1,6 +1,6 @@
 services:
   mongodb:
-    image: bitnami/mongodb:8.0
+    image: bitnami/mongodb:8.0.5
     restart: on-failure
 
     environment:
@@ -34,3 +34,7 @@ services:
 volumes:
   mongo_data:
     driver: local
+
+networks:
+  peacemaker-net:
+    driver: bridge

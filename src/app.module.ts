@@ -1,18 +1,14 @@
-import { ConfigSetupModule } from './config/configure.module';
-import { CoreModule } from './core/core.module';
-
 import { Module, ValidationPipe } from '@nestjs/common';
 import { APP_GUARD, APP_PIPE } from '@nestjs/core';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
-import { JwtAuthModule } from './modules/auth/jwt/jwt-auth.module';
+import { ConfigSetupModule } from './config/configure.module';
+import { CoreModule } from './core/core.module';
 import { JwtAuthStrategy } from './modules/auth/jwt/jwt-auth.strategy';
 import { GithubController } from './modules/auth/oauth/github/github.controller';
 import { GithubModule } from './modules/auth/oauth/github/github.module';
 import { CommentsController } from './modules/comments/comments.controller';
 import { CommentsModule } from './modules/comments/comments.module';
-import { FeedbacksController } from './modules/feedbacks/feedbacks.controller';
-import { FeedbacksModule } from './modules/feedbacks/feedbacks.module';
-import { MetricsModule } from './modules/metrics/metrics.module';
 import { RepositoriesController } from './modules/repositories/repositories.controller';
 import { RepositoriesModule } from './modules/repositories/repositories.module';
 import { SuggestionsController } from './modules/suggestions/suggestions.controller';
@@ -22,16 +18,14 @@ import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
+    EventEmitterModule.forRoot(),
     ConfigSetupModule,
-    JwtAuthModule,
-    GithubModule,
     CoreModule,
+    UsersModule,
     RepositoriesModule,
     CommentsModule,
     SuggestionsModule,
-    FeedbacksModule,
-    MetricsModule,
-    UsersModule,
+    GithubModule,
   ],
   controllers: [
     GithubController,
@@ -39,7 +33,6 @@ import { UsersModule } from './modules/users/users.module';
     RepositoriesController,
     CommentsController,
     SuggestionsController,
-    FeedbacksController,
   ],
   providers: [
     {

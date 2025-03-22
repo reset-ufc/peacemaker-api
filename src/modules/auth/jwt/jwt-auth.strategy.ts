@@ -9,8 +9,6 @@ import { JwtPayload } from './entities/jwt.entity';
 @Injectable()
 export class JwtAuthStrategy extends PassportStrategy(Strategy) {
   constructor(readonly configService: ConfigService<AppConfig>) {
-    const secretOrKey = configService.get<string>('auth.jwt.secret');
-
     super({
       // available options: https://github.com/mikenicholson/passport-jwt#configure-strategy
       jwtFromRequest: ExtractJwt.fromExtractors([
@@ -23,7 +21,7 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy) {
         },
       ]),
       ignoreExpiration: false,
-      secretOrKey,
+      secretOrKey: configService.get<string>('auth.jwt.secret')!,
     });
   }
 

@@ -1,53 +1,33 @@
-import {
-  IsBoolean,
-  IsDate,
-  IsMongoId,
-  IsNumber,
-  IsObject,
-  IsString,
-} from 'class-validator';
-import { Types } from 'mongoose';
-import { Comment } from '../entities/comment.entity';
-import { CommentType } from '../entities/enums';
+import { Comments } from '@/modules/comments/entities/comment.entity';
+import { IsBoolean, IsDateString, IsNumber, IsString } from 'class-validator';
 
-export class CreateCommentDto extends Comment {
+export class CreateCommentDto extends Comments {
   @IsString()
   gh_comment_id: string;
 
   @IsString()
+  gh_repository_id: string;
+
+  @IsString()
+  gh_repository_name: string;
+
+  @IsString()
+  gh_repository_owner: string;
+
+  @IsString()
+  gh_comment_sender_id: string;
+
+  @IsString()
+  gh_comment_sender_login: string;
+
+  @IsString()
   content: string;
 
-  @IsDate()
-  comment_created_at: Date;
-
   @IsString()
-  author_id: string;
-
-  @IsObject()
-  parent: {
-    type: CommentType;
-    gh_parent_id: number;
-    title: string;
-    url: string;
-  };
-
-  @IsString()
-  repository_fullname: string;
-
-  @IsBoolean()
-  is_repository_private: boolean;
-
-  @IsString()
-  repository_owner: string;
+  event_type: string;
 
   @IsNumber()
   toxicity_score: number;
-
-  @IsDate()
-  toxicity_analyzed_at: Date;
-
-  @IsBoolean()
-  flagged: boolean;
 
   @IsString()
   classification: string;
@@ -56,23 +36,14 @@ export class CreateCommentDto extends Comment {
   solutioned: boolean;
 
   @IsString()
-  solution: string;
-
-  @IsDate()
-  solution_analyzed_at: Date;
-
-  @IsMongoId()
-  solution_id: Types.ObjectId;
+  suggestion_id: string;
 
   @IsString()
-  event_type: string;
-
-  @IsNumber()
-  installation_id: number;
-
-  @IsBoolean()
-  moderated: boolean;
+  comment_html_url: string;
 
   @IsString()
-  moderation_action: string;
+  issue_id: string;
+
+  @IsDateString()
+  created_at: Date;
 }

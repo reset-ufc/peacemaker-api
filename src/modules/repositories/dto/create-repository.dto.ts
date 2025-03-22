@@ -1,22 +1,25 @@
-import { IsBoolean, IsString } from 'class-validator';
-import { ObjectId } from 'mongoose';
+import { IsBoolean, IsDate, IsString } from 'class-validator';
 import { Repository } from '../entities/repository.entity';
 
 export class CreateRepositoryDto extends Repository {
-  readonly user_id: ObjectId;
+  @IsString()
+  name: string;
 
   @IsString()
-  readonly gh_repository_id: string;
+  gh_repository_id: string;
 
   @IsString()
-  readonly name: string;
+  gh_repo_fullname: string;
 
   @IsString()
-  readonly repo_fullname: string;
-
-  @IsString()
-  readonly url: string;
+  gh_url: string;
 
   @IsBoolean()
-  readonly is_private: boolean;
+  private: boolean;
+
+  @IsString()
+  owner_gh_id: string;
+
+  @IsDate()
+  created_at: Date;
 }

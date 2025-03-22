@@ -1,32 +1,42 @@
+import { User, UserSchema } from '@/modules/users/entities/user.entity';
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import {
-  Suggestion,
-  SuggestionSchema,
+  Suggestions,
+  SuggestionsSchema,
 } from '../suggestions/entities/suggestion.entity';
 import { SuggestionsModule } from '../suggestions/suggestions.module';
 import { CommentsController } from './comments.controller';
 import { CommentsService } from './comments.service';
-import { Comment, CommentSchema } from './entities/comment.entity';
+import { Comments, CommentsSchema } from './entities/comment.entity';
+import { Parents, ParentsSchema } from './entities/parent.entity';
 
 @Module({
   imports: [
-    SuggestionsModule,
     HttpModule,
+    SuggestionsModule,
     MongooseModule.forFeature([
       {
-        name: Comment.name,
-        schema: CommentSchema,
+        name: Comments.name,
+        schema: CommentsSchema,
       },
       {
-        name: Suggestion.name,
-        schema: SuggestionSchema,
+        name: Parents.name,
+        schema: ParentsSchema,
+      },
+      {
+        name: Suggestions.name,
+        schema: SuggestionsSchema,
+      },
+      {
+        name: User.name,
+        schema: UserSchema,
       },
     ]),
   ],
-  providers: [CommentsService],
   controllers: [CommentsController],
+  providers: [CommentsService],
   exports: [CommentsService],
 })
 export class CommentsModule {}
