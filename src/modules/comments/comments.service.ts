@@ -96,6 +96,18 @@ export class CommentsService {
     return results[0];
   }
 
+  async verifySolutioned(commentId: string) {
+    const comment = await this.commentsModel.findOne({
+      gh_comment_id: commentId,
+    });
+
+    if (!comment) {
+      return null;
+    }
+
+    return comment.solutioned;
+  }
+
   async update(
     id: string,
     userGithubId: string,

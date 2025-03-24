@@ -67,6 +67,10 @@ export class CommentsController {
     const suggestions =
       await this.suggestionsService.findAllByComment(commentId);
 
+    if (await this.commentsService.verifySolutioned(commentId)) {
+      return response.status(400).json({ message: 'Comment not solutioned' });
+    }
+
     return response.status(200).json({ suggestions });
   }
 
