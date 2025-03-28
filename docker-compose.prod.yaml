@@ -1,0 +1,37 @@
+services:
+  backend:
+    container_name: peacemaker-api-backend
+
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+      target: production
+      args:
+        - NEST_API_PORT=${NEST_API_PORT}
+        - NEST_API_SERVER_URL=${NEST_API_SERVER_URL}
+        - AUTH_JWT_SECRET=${AUTH_JWT_SECRET}
+        - JWT_EXPIRATION_TIME_SECONDS=${JWT_EXPIRATION_TIME_SECONDS}
+        - GITHUB_OAUTH_CLIENT_ID=${GITHUB_OAUTH_CLIENT_ID}
+        - GITHUB_OAUTH_CLIENT_SECRET=${GITHUB_OAUTH_CLIENT_SECRET}
+        - GITHUB_OAUTH_CALLBACK_URL=${GITHUB_OAUTH_CALLBACK_URL}
+        - GITHUB_OAUTH_SCOPE=${GITHUB_OAUTH_SCOPE}
+        - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+        - ENCRYPTION_IV=${ENCRYPTION_IV}
+        - MONGODB_DATABASE_URL=${MONGODB_DATABASE_URL}
+
+    env_file:
+      - .env
+
+    restart: on-failure
+
+    ports:
+      - '3000:3000'
+
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'

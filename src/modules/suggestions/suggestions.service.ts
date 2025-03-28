@@ -1,0 +1,39 @@
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { CreateFeedbackDto } from './dto/create-feedback.dto';
+import { Feedbacks } from './entities/feedback.entity';
+import { Suggestions } from './entities/suggestion.entity';
+
+@Injectable()
+export class SuggestionsService {
+  constructor(
+    @InjectModel(Suggestions.name)
+    private readonly suggestionsModel: Model<Suggestions>,
+
+    @InjectModel(Feedbacks.name)
+    private readonly feedbacksModel: Model<Feedbacks>,
+  ) {}
+
+  async findAllByComment(id: string) {
+    const suggestions = await this.suggestionsModel.find({
+      gh_comment_id: id,
+    });
+
+    return suggestions;
+  }
+
+  async findOne(id: string) {
+    const suggestion = await this.suggestionsModel.findOne({
+      gh_comment_id: id,
+    });
+
+    return suggestion;
+  }
+
+  async feedback(createFeedbackDto: CreateFeedbackDto) {
+    const feedback = await this.feedbacksModel.create(createFeedbackDto);
+
+    return feedback;
+  }
+}

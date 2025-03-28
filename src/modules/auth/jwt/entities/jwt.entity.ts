@@ -15,7 +15,10 @@ export class JwtPayload {
 
   /** Basic user information */
   readonly user: {
+    readonly github_id: string;
     readonly name: string;
-    readonly github_id: number;
+    readonly avatar_url: string;
+    readonly email: string;
+    readonly username: string;
   };
 }

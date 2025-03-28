@@ -4,8 +4,6 @@ import { setupSwagger } from './swagger/swagger.setup';
 
 @Module({
   imports: [MongodbModule],
-  providers: [],
-  exports: [],
 })
 export class CoreModule {
   static configureSwagger(app: INestApplication): void {
