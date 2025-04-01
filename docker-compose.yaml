@@ -7,7 +7,7 @@ services:
       MONGODB_USERNAME: peacemaker
       MONGODB_PASSWORD: peacemaker-password
       MONGODB_ROOT_PASSWORD: my-secure-password
-      MONGODB_DATABASE: peacemaker-bot-poc
+      MONGODB_DATABASE: peacemaker-bot
 
     ports:
       - '27017:27017'

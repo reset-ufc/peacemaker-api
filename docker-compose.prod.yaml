@@ -1,7 +1,5 @@
 services:
   backend:
-    container_name: peacemaker-api-backend
-
     build:
       context: .
       dockerfile: Dockerfile.production
