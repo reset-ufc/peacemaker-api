@@ -21,6 +21,10 @@ export class Suggestions {
   @ApiProperty()
   @Prop({ required: true, type: Date })
   created_at: Date;
+
+  @ApiProperty()
+  @Prop({ required: true, type: Boolean, default: false })
+  is_rejected: boolean;
 }
 
 export const SuggestionsSchema = SchemaFactory.createForClass(Suggestions);
