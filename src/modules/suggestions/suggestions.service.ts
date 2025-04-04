@@ -38,6 +38,25 @@ export class SuggestionsService {
     return feedback;
   }
 
+  async edit(
+    suggestion_id: string,
+    content: string,
+  ) {
+    const suggestion = await this.suggestionsModel.findOne({
+      _id: suggestion_id,
+    });
+
+    if (!suggestion) {
+      return null;
+    }
+
+    suggestion.content = content;
+    suggestion.is_edited = true;
+    await suggestion.save();
+
+    return suggestion;
+  }
+
   async rejectCommentSuggestion(suggestion_id: string) {
     const suggestion = await this.suggestionsModel.findOne({
       _id: suggestion_id,
