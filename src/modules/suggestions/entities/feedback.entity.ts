@@ -17,8 +17,8 @@ export type FeedbacksDocument = Feedbacks & Document;
 
 // Table feedbacks {
 //   suggestion_id string [ref: > suggestions.comment_id, note: "ID do comentário (GitHub) ao qual o feedback se refere"]
-//   is_useful     boolean [note: "Indica se o feedback considera a sugestão útil"]
-//   justification text    [note: "Justificativa fornecida se a sugestão não for considerada útil (obrigatória se is_useful for false)"]
+//   type          string [note: "Tipo de feedback (positivo ou negativo)"]
+//   justification text    [note: "Justificativa fornecida se a sugestão não for considerada útil ou não está sendo feita"]
 //   created_at    datetime [note: "Data de criação do feedback"]
 // }
 
