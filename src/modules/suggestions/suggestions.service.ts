@@ -18,6 +18,7 @@ export class SuggestionsService {
   async findAllByComment(id: string) {
     const suggestions = await this.suggestionsModel.find({
       gh_comment_id: id,
+      is_rejected: false,
     });
 
     return suggestions;
@@ -35,5 +36,41 @@ export class SuggestionsService {
     const feedback = await this.feedbacksModel.create(createFeedbackDto);
 
     return feedback;
+  }
+
+  async edit(
+    suggestion_id: string,
+    content: string,
+  ) {
+    const suggestion = await this.suggestionsModel.findOne({
+      _id: suggestion_id,
+    });
+
+    if (!suggestion) {
+      return null;
+    }
+
+    suggestion.content = content;
+    suggestion.is_edited = true;
+    await suggestion.save();
+
+    return suggestion;
+  }
+
+  async rejectCommentSuggestion(suggestion_id: string) {
+    const suggestion = await this.suggestionsModel.findOne({
+      _id: suggestion_id,
+    });
+
+    if (!suggestion) {
+      return null;
+    }
+
+    suggestion.is_rejected = true;
+    await suggestion.save();
+
+    return {
+      message: 'Suggestion rejected successfully',
+    };
   }
 }

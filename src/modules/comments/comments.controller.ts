@@ -4,17 +4,15 @@ import {
   Controller,
   Get,
   Param,
-  Patch,
   Post,
   Req,
-  Res,
+  Res
 } from '@nestjs/common';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { JwtPayload } from '../auth/jwt/entities/jwt.entity';
 import { CommentsService } from './comments.service';
 import { AcceptCommentSuggestionDto } from './dto/accept-suggestion.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
 
 @ApiTags('Comments')
 @Controller('comments')
@@ -98,28 +96,5 @@ export class CommentsController {
     );
 
     return response.status(200).json({ comment });
-  }
-
-  @ApiParam({ name: 'id', type: String })
-  @Patch(':id/edit')
-  async update(
-    @Req() request: Request,
-    @Res() response: Response,
-    @Param('id') id: string,
-    @Body() updateCommentDto: UpdateCommentDto,
-  ) {
-    const user = request?.user as JwtPayload['user'];
-
-    if (!user) {
-      return response.status(401).json({ message: 'Unauthorized' });
-    }
-
-    const commentUpdated = await this.commentsService.update(
-      id,
-      user.github_id,
-      updateCommentDto,
-    );
-
-    return response.status(200).json({ commentUpdated });
   }
 }

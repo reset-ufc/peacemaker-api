@@ -51,6 +51,17 @@ export class CommentsService {
           as: 'suggestions',
         },
       },
+      {
+        $addFields: {
+          suggestions: {
+            $filter: {
+              input: '$suggestions',
+              as: 'suggestion',
+              cond: { $eq: ['$$suggestion.is_rejected', false] },
+            },
+          },
+        },
+      },
     ];
 
     // Execute aggregation pipeline
