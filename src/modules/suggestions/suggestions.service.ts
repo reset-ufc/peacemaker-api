@@ -38,10 +38,7 @@ export class SuggestionsService {
     return feedback;
   }
 
-  async edit(
-    suggestion_id: string,
-    content: string,
-  ) {
+  async edit(suggestion_id: string, content: string) {
     const suggestion = await this.suggestionsModel.findOne({
       _id: suggestion_id,
     });

@@ -1,13 +1,5 @@
 import { SuggestionsService } from '@/modules/suggestions/suggestions.service';
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Req,
-  Res
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, Res } from '@nestjs/common';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { JwtPayload } from '../auth/jwt/entities/jwt.entity';

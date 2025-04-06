@@ -9,6 +9,8 @@ import { GithubController } from './modules/auth/oauth/github/github.controller'
 import { GithubModule } from './modules/auth/oauth/github/github.module';
 import { CommentsController } from './modules/comments/comments.controller';
 import { CommentsModule } from './modules/comments/comments.module';
+import { DashboardController } from './modules/dashboard/dashboard.controller';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { RepositoriesController } from './modules/repositories/repositories.controller';
 import { RepositoriesModule } from './modules/repositories/repositories.module';
 import { SuggestionsController } from './modules/suggestions/suggestions.controller';
@@ -26,6 +28,7 @@ import { UsersModule } from './modules/users/users.module';
     CommentsModule,
     SuggestionsModule,
     GithubModule,
+    DashboardModule,
   ],
   controllers: [
     GithubController,
@@ -33,6 +36,7 @@ import { UsersModule } from './modules/users/users.module';
     RepositoriesController,
     CommentsController,
     SuggestionsController,
+    DashboardController,
   ],
   providers: [
     {

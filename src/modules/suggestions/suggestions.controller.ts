@@ -9,7 +9,10 @@ import { SuggestionsService } from './suggestions.service';
 
 @Controller('suggestions')
 export class SuggestionsController {
-  constructor(private readonly suggestionsService: SuggestionsService, private readonly commentsService: CommentsService) {}
+  constructor(
+    private readonly suggestionsService: SuggestionsService,
+    private readonly commentsService: CommentsService,
+  ) {}
 
   @ApiBody({ type: CreateFeedbackDto })
   @Post('feedback')
@@ -42,7 +45,6 @@ export class SuggestionsController {
     @Param('suggestion_id') suggestionId: string,
     @Body() updateSuggestionDto: { content: string },
   ) {
-
     const user = request?.user as JwtPayload['user'];
     if (!user) {
       return response.status(401).json({ message: 'Unauthorized' });
@@ -50,7 +52,7 @@ export class SuggestionsController {
 
     const updatedSuggestion = await this.suggestionsService.edit(
       suggestionId,
-      updateSuggestionDto.content
+      updateSuggestionDto.content,
     );
 
     if (!updatedSuggestion) {
@@ -71,6 +73,8 @@ export class SuggestionsController {
       acceptDto,
     );
 
-    return response.status(200).json({ message: 'Suggestion updated and accepted successfully' });
+    return response
+      .status(200)
+      .json({ message: 'Suggestion updated and accepted successfully' });
   }
 }
