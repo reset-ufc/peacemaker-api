@@ -2,8 +2,14 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Comments, CommentsSchema } from '../comments/entities/comment.entity';
-import { Feedbacks, FeedbacksSchema } from '../suggestions/entities/feedback.entity';
-import { Suggestions, SuggestionsSchema } from '../suggestions/entities/suggestion.entity';
+import {
+  Feedbacks,
+  FeedbacksSchema,
+} from '../suggestions/entities/feedback.entity';
+import {
+  Suggestions,
+  SuggestionsSchema,
+} from '../suggestions/entities/suggestion.entity';
 import { DashboardController } from './dashboard.controller';
 import { DashboardService } from './dashboard.service';
 

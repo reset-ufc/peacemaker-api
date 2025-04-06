@@ -28,7 +28,7 @@ import { UsersModule } from './modules/users/users.module';
     CommentsModule,
     SuggestionsModule,
     GithubModule,
-    DashboardModule
+    DashboardModule,
   ],
   controllers: [
     GithubController,
@@ -36,7 +36,7 @@ import { UsersModule } from './modules/users/users.module';
     RepositoriesController,
     CommentsController,
     SuggestionsController,
-    DashboardController
+    DashboardController,
   ],
   providers: [
     {
