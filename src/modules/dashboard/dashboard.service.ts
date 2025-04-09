@@ -25,34 +25,22 @@ export class DashboardService {
     private readonly feedbacksModel: Model<FeedbacksDocument>,
   ) {}
 
-  async getDashboardData(period: string = '24h') {
-    let periodMs = 24 * 60 * 60 * 1000;
-    if (period === '7d') periodMs = 7 * 24 * 60 * 60 * 1000;
-    else if (period === '30d') periodMs = 30 * 24 * 60 * 60 * 1000;
-    const startDate = new Date(Date.now() - periodMs);
+  /**
+   * @param period - '24h', '7d' ou '30d'
+   */
+  calculateStartDate(period: string): Date {
+    let periodMs = 24 * 60 * 60 * 1000; // 24h padrão
+    if (period === '7d') {
+      periodMs = 7 * 24 * 60 * 60 * 1000;
+    } else if (period === '30d') {
+      periodMs = 30 * 24 * 60 * 60 * 1000;
+    } else if (period === '1y') {
+      periodMs = 365 * 24 * 60 * 60 * 1000;
+    }
+    return new Date(Date.now() - periodMs);
+  }
 
-    // 1) Contagens filtradas pelo período
-    const totalComments = await this.commentsModel.countDocuments({
-      created_at: { $gte: startDate },
-    });
-
-    const flaggedComments = await this.commentsModel.countDocuments({
-      created_at: { $gte: startDate },
-      toxicity_score: { $gte: 0.8 },
-    });
-
-    const acceptedSuggestions = await this.suggestionsModel.countDocuments({
-      created_at: { $gte: startDate },
-      is_edited: true,
-      is_rejected: false,
-    });
-
-    const refusedSuggestions = await this.suggestionsModel.countDocuments({
-      created_at: { $gte: startDate },
-      is_rejected: true,
-    });
-
-    // 2) Moderation Activity: agrupar por mês (abreviado) dos comentários dentro do período
+  async getModerationActivity(startDate: Date) {
     const moderationActivityAgg = await this.commentsModel.aggregate([
       { $match: { created_at: { $gte: startDate } } },
       {
@@ -66,20 +54,22 @@ export class DashboardService {
       },
       { $sort: { _id: 1 } },
     ]);
-    const moderationActivity = moderationActivityAgg.map(item => ({
-      month: item._id,
-      comments: item.comments,
-      flags: item.flags,
-    }));
+    return moderationActivityAgg.map(
+      (item: { _id: string; comments: number; flags: number }) => ({
+        month: item._id,
+        comments: item.comments,
+        flags: item.flags,
+      }),
+    );
+  }
 
-    // 3) Recent Flagged: comentários com toxicity_score >= 0.8 dentro do período
+  private async getRecentFlagged(startDate: Date) {
     const recentFlaggedDocs = await this.commentsModel
       .find({ created_at: { $gte: startDate }, toxicity_score: { $gte: 0.8 } })
       .sort({ created_at: -1 })
       .limit(5)
       .lean();
-
-    const recentFlagged = recentFlaggedDocs.map(doc => {
+    return recentFlaggedDocs.map(doc => {
       let severity = 'Medium';
       if (doc.toxicity_score >= 0.9) severity = 'High';
       return {
@@ -88,66 +78,102 @@ export class DashboardService {
         action: severity === 'High' ? 'Review' : 'Mute',
       };
     });
+  }
 
-    // 4) Radar Flags: agrupar por classificação dentro do período
+  private async getRadarFlags(startDate: Date) {
     const classificationDataAgg = await this.commentsModel.aggregate([
       { $match: { created_at: { $gte: startDate } } },
       { $group: { _id: '$classification', total: { $sum: 1 } } },
       { $sort: { total: -1 } },
     ]);
-    const radarFlags = classificationDataAgg.map(c => ({
+    return classificationDataAgg.map((c: { _id: string; total: number }) => ({
       category: c._id,
       value: c.total,
     }));
+  }
 
-    // 5) Moderation Actions: simuladas (aceitas e rejeitadas dentro do período)
-    const totalActions = acceptedSuggestions + refusedSuggestions;
-    const moderationActions = {
+  private async getModerationActions(
+    startDate: Date,
+    accepted: number,
+    refused: number,
+  ) {
+    const totalActions = accepted + refused;
+    return {
       total: totalActions,
       data: [
-        { name: 'Accept', value: acceptedSuggestions },
-        { name: 'Reject', value: refusedSuggestions },
+        { name: 'Accept', value: accepted },
+        { name: 'Reject', value: refused },
       ],
     };
+  }
 
-    // 6) Para os cards, também podemos calcular median e average scores
-    const medianScoreAgg = await this.commentsModel.aggregate([
-      { $match: { created_at: { $gte: startDate } } },
-      { $group: { _id: null, median: { $avg: '$toxicity_score' } } },
-      { $project: { _id: 0, median: { $round: ['$median', 2] } } },
-    ]);
+  private async getCommentScores(startDate: Date) {
+    const medianScoreAgg: { median: number }[] =
+      await this.commentsModel.aggregate([
+        { $match: { created_at: { $gte: startDate } } },
+        { $group: { _id: null, median: { $avg: '$toxicity_score' } } },
+        { $project: { _id: 0, median: { $round: ['$median', 2] } } },
+      ]);
+    const averageScoreAgg: { average: number }[] =
+      await this.commentsModel.aggregate([
+        { $match: { created_at: { $gte: startDate } } },
+        { $group: { _id: null, average: { $avg: '$toxicity_score' } } },
+        { $project: { _id: 0, average: { $round: ['$average', 2] } } },
+      ]);
+    return {
+      medianCommentScore: medianScoreAgg.length ? medianScoreAgg[0].median : 0,
+      averageCommentScore: averageScoreAgg.length
+        ? averageScoreAgg[0].average
+        : 0,
+    };
+  }
 
-    const medianScoreValue = medianScoreAgg.length
-      ? medianScoreAgg[0].median
-      : 0;
+  async getDashboardData(period: string = '24h') {
+    const startDate = this.calculateStartDate(period);
 
-    const averageScoreAgg = await this.commentsModel.aggregate([
-      { $match: { created_at: { $gte: startDate } } },
-      { $group: { _id: null, average: { $avg: '$toxicity_score' } } },
-      { $project: { _id: 0, average: { $round: ['$average', 2] } } },
-    ]);
-
-    const averageScoreValue = averageScoreAgg.length
-      ? averageScoreAgg[0].average
-      : 0;
-
+    const totalComments = await this.commentsModel.countDocuments({
+      created_at: { $gte: startDate },
+    });
+    const flaggedComments = await this.commentsModel.countDocuments({
+      created_at: { $gte: startDate },
+      toxicity_score: { $gte: 0.8 },
+    });
+    const acceptedSuggestions = await this.suggestionsModel.countDocuments({
+      created_at: { $gte: startDate },
+      is_edited: true,
+      is_rejected: false,
+    });
+    const refusedSuggestions = await this.suggestionsModel.countDocuments({
+      created_at: { $gte: startDate },
+      is_rejected: true,
+    });
     const resolvedComments = await this.commentsModel.countDocuments({
       created_at: { $gte: startDate },
       is_resolved: true,
     });
 
+    const { medianCommentScore, averageCommentScore } =
+      await this.getCommentScores(startDate);
+
+    const recentFlagged = await this.getRecentFlagged(startDate);
+    const radarFlags = await this.getRadarFlags(startDate);
+    const moderationActions = await this.getModerationActions(
+      startDate,
+      acceptedSuggestions,
+      refusedSuggestions,
+    );
+
     return {
-      averageCommentScore: averageScoreValue,
-      medianCommentScore: medianScoreValue,
+      averageCommentScore,
+      medianCommentScore,
       totalComments,
       resolvedComments,
-      moderationActivity,
-      recentFlagged,
-      radarFlags,
-      moderationActions,
       flaggedComments,
       acceptedSuggestions,
       refusedSuggestions,
+      recentFlagged,
+      radarFlags,
+      moderationActions,
     };
   }
 }

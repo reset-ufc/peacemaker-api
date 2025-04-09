@@ -23,4 +23,22 @@ export class DashboardController {
         .json({ message: error.message });
     }
   }
+
+  @Get('moderation-activity')
+  async getModerationActivity(
+    @Query('period') period: string, // '24h', '7d', '30d' ou '1y'
+    @Res() response: Response,
+  ) {
+    try {
+      const selectedPeriod = period || '24h';
+      const startDate =
+        this.dashboardService.calculateStartDate(selectedPeriod);
+      const data = await this.dashboardService.getModerationActivity(startDate);
+      return response.status(HttpStatus.OK).json(data);
+    } catch (error) {
+      return response
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: error.message });
+    }
+  }
 }
