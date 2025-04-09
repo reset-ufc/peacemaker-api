@@ -25,6 +25,7 @@ export interface AppConfig {
       clientSecret: string;
       callbackURL: string;
       scope: string;
+      personalAccessToken: string;
     };
   };
 
@@ -35,6 +36,7 @@ export interface AppConfig {
   'auth.github.clientSecret'?: string;
   'auth.github.callbackURL'?: string;
   'auth.github.scope'?: string;
+  'auth.github.personalAccessToken'?: string;
 
   'database.mongodb.name'?: string;
   'database.mongodb.user'?: string;

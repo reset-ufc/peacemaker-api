@@ -100,6 +100,17 @@ export class CommentsService {
           as: 'suggestions',
         },
       },
+      {
+        $addFields: {
+          suggestions: {
+            $filter: {
+              input: '$suggestions',
+              as: 'suggestion',
+              cond: { $eq: ['$$suggestion.is_rejected', false] },
+            },
+          },
+        },
+      },
     ];
 
     // Execute aggregation pipeline
@@ -156,6 +167,8 @@ export class CommentsService {
       return null;
     }
 
+    console.log(user);
+
     const suggestionDoc = await this.suggestionsModel.findOne({
       gh_comment_id: commentId,
       _id: suggestionId,
@@ -186,11 +199,17 @@ export class CommentsService {
         { body: event.suggestionContent },
         {
           headers: {
-            Authorization: `Bearer ${event.githubToken}`,
+            Authorization: `token ${event.githubToken}`,
             Accept: 'application/vnd.github+json',
           },
         },
       );
+
+      await this.commentsModel.updateOne(
+        { gh_comment_id: event.commentId },
+        { solutioned: true },
+      );
+
       const responseData = response.data;
       console.log(responseData);
     } catch (error) {

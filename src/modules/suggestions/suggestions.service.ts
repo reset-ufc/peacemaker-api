@@ -20,7 +20,7 @@ export class SuggestionsService {
       gh_comment_id: id,
       is_rejected: false,
     });
-
+    console.log(suggestions);
     return suggestions;
   }
 

@@ -35,7 +35,6 @@ export class CommentsController {
     @Param('comment_id') commentId: string,
   ) {
     const user = request?.user as JwtPayload['user'];
-
     if (!user) {
       return response.status(401).json({ message: 'Unauthorized' });
     }
@@ -58,7 +57,7 @@ export class CommentsController {
       await this.suggestionsService.findAllByComment(commentId);
 
     if (await this.commentsService.verifySolutioned(commentId)) {
-      return response.status(400).json({ message: 'Comment not solutioned' });
+      return response.status(400).json({ message: 'Comment solutioned' });
     }
 
     return response.status(200).json({ suggestions });

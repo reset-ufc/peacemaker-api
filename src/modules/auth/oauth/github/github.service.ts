@@ -5,7 +5,7 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AxiosError } from 'axios';
-import { AccessTokenResponse, GithubUser } from './entities/github.entity';
+import { GithubUser } from './entities/github.entity';
 
 @Injectable()
 export class GithubService {
@@ -18,12 +18,12 @@ export class GithubService {
 
   public async callback(code: string): Promise<string> {
     const accessTokenResponse = await this.accessToken(code);
-    const profile = await this.profile(accessTokenResponse.access_token);
-
+    console.log('Token: ' + accessTokenResponse);
+    const profile = await this.profile(accessTokenResponse);
+    console.log('Profile: ' + profile);
     const user = await this.userService.findOneByGithubId(String(profile.id));
-
+    console.log('User: ' + user);
     // const encryptedToken = encryptToken(accessTokenResponse.access_token);
-
     if (!user) {
       const createUserDto: CreateUserDto = {
         gh_user_id: String(profile.id),
@@ -31,7 +31,7 @@ export class GithubService {
         name: profile.name,
         username: profile.login,
         avatar_url: profile.avatar_url,
-        encrypted_token: accessTokenResponse.access_token,
+        encrypted_token: accessTokenResponse,
         created_at: new Date(),
       };
 
@@ -68,40 +68,54 @@ export class GithubService {
   }
 
   private async accessToken(code: string) {
-    const githubClientId = this.configService.get<string>(
-      'auth.github.clientId',
-    );
-    const githubSecret = this.configService.get<string>(
-      'auth.github.clientSecret',
-    );
-    const githubScope = this.configService.get<string>('auth.github.scope');
+    // const githubClientId = this.configService.get<string>(
+    //   'auth.github.clientId',
+    // );
+    // const githubSecret = this.configService.get<string>(
+    //   'auth.github.clientSecret',
+    // );
+    // const githubScope = this.configService.get<string>('auth.github.scope');
 
+    // try {
+    //   const response = await this.httpService.axiosRef.post(
+    //     'https://github.com/login/oauth/access_token',
+    //     {
+    //       client_id: githubClientId,
+    //       client_secret: githubSecret,
+    //       code,
+    //       scope: githubScope,
+    //     },
+    //     {
+    //       headers: {
+    //         Accept: 'application/json',
+    //       },
+    //     },
+    //   );
+
+    //   const responseData =
+    //     (await response.data) as unknown as AccessTokenResponse;
+
+    //   return responseData;
     try {
-      const response = await this.httpService.axiosRef.post(
-        'https://github.com/login/oauth/access_token',
-        {
-          client_id: githubClientId,
-          client_secret: githubSecret,
-          code,
-          scope: githubScope,
-        },
-        {
-          headers: {
-            Accept: 'application/json',
-          },
-        },
+      const personalAccessToken = this.configService.get<string>(
+        'auth.github.personalAccessToken',
       );
 
-      const responseData =
-        (await response.data) as unknown as AccessTokenResponse;
+      if (!personalAccessToken) {
+        throw new Error('GitHub personal access token is not configured.');
+      }
 
-      return responseData;
+      return personalAccessToken;
     } catch (error) {
       if (error instanceof AxiosError) {
         console.error('Error fetching access token:', error.response?.data);
         throw new Error(`Failed to fetch access token: ${error.message}`);
       }
-      throw error;
+
+      console.error('Unexpected error fetching access token:', error);
+      throw new Error(
+        'An unexpected error occurred while fetching the access token.',
+      );
     }
   }
 
