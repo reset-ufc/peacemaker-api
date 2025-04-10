@@ -92,11 +92,7 @@ export class DashboardService {
     }));
   }
 
-  private async getModerationActions(
-    startDate: Date,
-    accepted: number,
-    refused: number,
-  ) {
+  private async getModerationActions(accepted: number, refused: number) {
     const totalActions = accepted + refused;
     return {
       total: totalActions,
@@ -138,10 +134,10 @@ export class DashboardService {
       created_at: { $gte: startDate },
       toxicity_score: { $gte: 0.8 },
     });
-    const acceptedSuggestions = await this.suggestionsModel.countDocuments({
+    const acceptedSuggestionsCount = await this.commentsModel.countDocuments({
       created_at: { $gte: startDate },
-      is_edited: true,
-      is_rejected: false,
+      solutioned: true,
+      suggestion_id: { $ne: null },
     });
     const refusedSuggestions = await this.suggestionsModel.countDocuments({
       created_at: { $gte: startDate },
@@ -158,8 +154,7 @@ export class DashboardService {
     const recentFlagged = await this.getRecentFlagged(startDate);
     const radarFlags = await this.getRadarFlags(startDate);
     const moderationActions = await this.getModerationActions(
-      startDate,
-      acceptedSuggestions,
+      acceptedSuggestionsCount,
       refusedSuggestions,
     );
 
@@ -169,7 +164,7 @@ export class DashboardService {
       totalComments,
       resolvedComments,
       flaggedComments,
-      acceptedSuggestions,
+      acceptedSuggestionsCount,
       refusedSuggestions,
       recentFlagged,
       radarFlags,

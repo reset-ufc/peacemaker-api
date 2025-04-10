@@ -185,6 +185,7 @@ export class CommentsService {
         comment.gh_repository_name,
         comment.gh_comment_id,
         suggestionDoc.content,
+        suggestionDoc._id,
         user.encrypted_token,
         acceptCommentSuggestionDto,
       ),
@@ -207,11 +208,15 @@ export class CommentsService {
 
       await this.commentsModel.updateOne(
         { gh_comment_id: event.commentId },
-        { solutioned: true },
+        {
+          solutioned: true,
+          suggestion_id: event.suggestionId,
+        },
       );
 
       const responseData = response.data;
-      console.log(responseData);
+
+      return responseData;
     } catch (error) {
       console.error(error);
       throw new InternalServerErrorException(
