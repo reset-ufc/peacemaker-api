@@ -6,7 +6,9 @@
 app = 'peacemaker-backend'
 primary_region = 'gig'
 
-[build.args]
+
+[build]
+  dockerfile = "Dockerfile.production"
 
 
 [http_service]
