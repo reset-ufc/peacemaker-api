@@ -1,4 +1,5 @@
 import { Types } from 'mongoose';
+
 import { AcceptCommentSuggestionDto } from './dto/accept-suggestion.dto';
 
 export class EditCommentEvent {
