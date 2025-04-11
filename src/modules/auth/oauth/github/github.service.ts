@@ -18,11 +18,8 @@ export class GithubService {
 
   public async callback(code: string): Promise<string> {
     const accessTokenResponse = await this.accessToken(code);
-    console.log('Token: ' + accessTokenResponse);
     const profile = await this.profile(accessTokenResponse);
-    console.log('Profile: ' + profile);
     const user = await this.userService.findOneByGithubId(String(profile.id));
-    console.log('User: ' + user);
     // const encryptedToken = encryptToken(accessTokenResponse.access_token);
     if (!user) {
       const createUserDto: CreateUserDto = {

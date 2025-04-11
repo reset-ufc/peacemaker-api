@@ -24,8 +24,6 @@ export class CommentsController {
 
     const comments = await this.commentsService.findAll(user.github_id);
 
-    console.log(comments);
-
     return response.status(200).json({ comments });
   }
 

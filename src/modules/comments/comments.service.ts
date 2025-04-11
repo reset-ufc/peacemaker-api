@@ -27,6 +27,7 @@ export class CommentsService {
       {
         $match: {
           gh_comment_sender_id: userId,
+          //solutioned: false,
         },
       },
       {
@@ -158,16 +159,16 @@ export class CommentsService {
     const comment = await this.findOne(commentId, userGithubId);
 
     if (!comment) {
+      console.warn('Comment not found for id:', commentId);
       return null;
     }
 
     const user = await this.userModel.findOne({ gh_user_id: userGithubId });
 
     if (!user) {
+      console.warn('User not found for GitHub ID:', userGithubId);
       return null;
     }
-
-    console.log(user);
 
     const suggestionDoc = await this.suggestionsModel.findOne({
       gh_comment_id: commentId,
@@ -175,6 +176,7 @@ export class CommentsService {
     });
 
     if (!suggestionDoc) {
+      console.warn('Suggestion not found for id:', suggestionId);
       return null;
     }
 
@@ -215,10 +217,9 @@ export class CommentsService {
       );
 
       const responseData = response.data;
-
       return responseData;
     } catch (error) {
-      console.error(error);
+      console.error('Error in commentEdit:', error);
       throw new InternalServerErrorException(
         `Failed to update comment: ${error.message}`,
       );
