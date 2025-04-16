@@ -62,7 +62,7 @@ export class DashboardService {
     });
     const resolvedComments = await this.commentsModel.countDocuments({
       ...filter,
-      is_resolved: true,
+      solutioned: true,
     });
     const {
       medianCommentScore,
@@ -83,21 +83,36 @@ export class DashboardService {
 
   private async getCommentScores(startDate: Date, repo?: string) {
     const filter = this.buildFilter(startDate, repo);
-    const medianScoreAgg = await this.commentsModel.aggregate([
-      { $match: filter },
-      { $group: { _id: null, median: { $avg: '$toxicity_score' } } },
-      { $project: { _id: 0, median: { $round: ['$median', 2] } } },
-    ]);
+
     const averageScoreAgg = await this.commentsModel.aggregate([
       { $match: filter },
       { $group: { _id: null, average: { $avg: '$toxicity_score' } } },
       { $project: { _id: 0, average: { $round: ['$average', 2] } } },
     ]);
+    const averageScore = averageScoreAgg.length
+      ? averageScoreAgg[0].average
+      : 0;
+
+    const scoresDocs = await this.commentsModel
+      .find(filter, { toxicity_score: 1, _id: 0 })
+      .sort({ toxicity_score: 1 })
+      .lean();
+    const scores = scoresDocs.map(doc => doc.toxicity_score);
+
+    let medianScore = 0;
+    if (scores.length) {
+      const mid = Math.floor(scores.length / 2);
+      if (scores.length % 2 === 0) {
+        medianScore = (scores[mid - 1] + scores[mid]) / 2;
+      } else {
+        medianScore = scores[mid];
+      }
+      medianScore = Math.round(medianScore * 100) / 100;
+    }
+
     return {
-      medianCommentScore: medianScoreAgg.length ? medianScoreAgg[0].median : 0,
-      averageCommentScore: averageScoreAgg.length
-        ? averageScoreAgg[0].average
-        : 0,
+      medianCommentScore: medianScore,
+      averageCommentScore: averageScore,
     };
   }
 
@@ -128,9 +143,8 @@ export class DashboardService {
   async getRecentFlagged(startDate: Date, repo?: string): Promise<any[]> {
     const filter = this.buildFilter(startDate, repo);
     const recentFlaggedDocs = await this.commentsModel
-      .find({ ...filter, toxicity_score: { $gte: 0.8 } })
+      .find({ ...filter, toxicity_score: { $gte: 0.6 } })
       .sort({ created_at: -1 })
-      .limit(5)
       .lean();
     return recentFlaggedDocs.map(doc => {
       let severity = 'Medium';
@@ -139,6 +153,7 @@ export class DashboardService {
         author: doc.gh_comment_sender_login,
         severity,
         action: severity === 'High' ? 'Review' : 'Mute',
+        comment_html_url: doc.comment_html_url,
       };
     });
   }
