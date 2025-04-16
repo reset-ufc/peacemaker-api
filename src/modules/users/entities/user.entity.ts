@@ -1,3 +1,4 @@
+import { Model } from '@/enums/models';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { Document } from 'mongoose';
@@ -11,6 +12,7 @@ export type UserDocument = User & Document;
 //   email            string
 //   avatar_url       string
 //   encripted_token  string
+//   llm_id          string
 //   created_at       datetime
 // }
 
@@ -39,6 +41,11 @@ export class User {
   @ApiProperty()
   @Prop({ required: true })
   encrypted_token: string;
+
+  // Defaults to Model.LLAMA_3_3_70B_VERSATILE
+  @ApiProperty()
+  @Prop({ required: true, default: Model.LLAMA_3_3_70B_VERSATILE })
+  llm_id: string;
 
   @ApiProperty()
   @Prop({
