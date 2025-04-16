@@ -30,6 +30,7 @@ export class GithubService {
         avatar_url: profile.avatar_url,
         encrypted_token: accessTokenResponse,
         created_at: new Date(),
+        llm_id: '',
       };
 
       const createdUser = await this.userService.create(createUserDto);
