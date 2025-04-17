@@ -48,6 +48,14 @@ export class User {
   llm_id: string;
 
   @ApiProperty()
+  @Prop({ required: false })
+  openai_api_key?: string;
+
+  @ApiProperty()
+  @Prop({ required: false })
+  groq_api_key?: string;
+
+  @ApiProperty()
   @Prop({
     required: true,
     default: Date.now,
