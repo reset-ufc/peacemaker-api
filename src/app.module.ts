@@ -11,6 +11,8 @@ import { CommentsController } from './modules/comments/comments.controller';
 import { CommentsModule } from './modules/comments/comments.module';
 import { DashboardController } from './modules/dashboard/dashboard.controller';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { LlmsController } from './modules/llm/llm.controller';
+import { LlmModule } from './modules/llm/llm.module';
 import { RepositoriesController } from './modules/repositories/repositories.controller';
 import { RepositoriesModule } from './modules/repositories/repositories.module';
 import { SuggestionsController } from './modules/suggestions/suggestions.controller';
@@ -29,6 +31,7 @@ import { UsersModule } from './modules/users/users.module';
     SuggestionsModule,
     GithubModule,
     DashboardModule,
+    LlmModule,
   ],
   controllers: [
     GithubController,
@@ -37,6 +40,7 @@ import { UsersModule } from './modules/users/users.module';
     CommentsController,
     SuggestionsController,
     DashboardController,
+    LlmsController,
   ],
   providers: [
     {
