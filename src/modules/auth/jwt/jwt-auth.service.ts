@@ -22,7 +22,7 @@ export class JwtAuthService {
     const payload: JwtPayload = {
       sub: user.gh_user_id,
       iat: nowInSeconds,
-      exp: nowInSeconds + 60 * 60 * 24 * 7, // 1 semana em segundos
+      exp: nowInSeconds + 60 * 60 * 24, // 1 dia em segundos
       user: {
         github_id: user.gh_user_id,
         name: user.name,
