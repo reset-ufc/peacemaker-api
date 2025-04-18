@@ -59,6 +59,14 @@ export class Comments {
   comment_html_url: string;
 
   @ApiProperty()
+  @Prop({ required: true, type: Number })
+  editAttempts: number;
+
+  @ApiProperty()
+  @Prop({ required: true, type: Boolean })
+  needsAttention: boolean;
+
+  @ApiProperty()
   @Prop({ required: true, type: String })
   issue_id: string;
 
