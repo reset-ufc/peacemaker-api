@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -25,6 +25,13 @@ export class UsersService {
     );
 
     return userCreated;
+  }
+
+  async setGithubToken(gh_user_id: string, token: string) {
+    const user = await this.userModel.findOne({ gh_user_id });
+    if (!user) throw new NotFoundException('User not found');
+    user.encrypted_token = token;
+    await user.save();
   }
 
   async findOneByGithubId(githubId: string): Promise<UserDocument | null> {

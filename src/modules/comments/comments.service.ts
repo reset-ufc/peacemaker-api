@@ -1,7 +1,11 @@
 import { Suggestions } from '@/modules/suggestions/entities/suggestion.entity';
 import { User } from '@/modules/users/entities/user.entity';
 import { HttpService } from '@nestjs/axios';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, PipelineStage } from 'mongoose';
@@ -168,6 +172,12 @@ export class CommentsService {
     if (!user) {
       console.warn('User not found for GitHub ID:', userGithubId);
       return null;
+    }
+
+    if (!user.encrypted_token) {
+      throw new BadRequestException(
+        'Por favor, configure seu GitHub token antes de aceitar sugestões.',
+      );
     }
 
     const suggestionDoc = await this.suggestionsModel.findOneAndUpdate(
