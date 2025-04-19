@@ -242,7 +242,6 @@ export class DashboardService {
     const startDate = this.calculateStartDate(period);
     const filter = this.buildFilter(startDate, repo);
     filter['parentType'] = type;
-    console.log('Filter:', filter);
 
     const incivilityAgg = await this.commentsModel.aggregate([
       { $match: filter },
@@ -261,7 +260,7 @@ export class DashboardService {
       { $sort: { _id: 1 } },
       { $limit: 4 },
     ]);
-    console.log('Incivility Aggregation:', incivilityAgg);
+
     return incivilityAgg.map(
       (item: { _id: string; incivilityCount: number }) => ({
         week: item._id,

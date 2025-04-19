@@ -30,6 +30,9 @@ export class GithubService {
         avatar_url: profile.avatar_url,
         encrypted_token: accessTokenResponse,
         created_at: new Date(),
+        llm_id: '',
+        openai_api_key: '',
+        groq_api_key: '',
       };
 
       const createdUser = await this.userService.create(createUserDto);

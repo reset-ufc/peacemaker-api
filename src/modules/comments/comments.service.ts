@@ -170,10 +170,19 @@ export class CommentsService {
       return null;
     }
 
-    const suggestionDoc = await this.suggestionsModel.findOne({
-      gh_comment_id: commentId,
-      _id: suggestionId,
-    });
+    const suggestionDoc = await this.suggestionsModel.findOneAndUpdate(
+      {
+        gh_comment_id: commentId,
+        _id: suggestionId,
+      },
+      {
+        content: acceptCommentSuggestionDto.suggestion_content,
+        is_edited: acceptCommentSuggestionDto.is_edited,
+      },
+      {
+        new: true,
+      },
+    );
 
     if (!suggestionDoc) {
       console.warn('Suggestion not found for id:', suggestionId);
@@ -205,14 +214,6 @@ export class CommentsService {
             Authorization: `token ${event.githubToken}`,
             Accept: 'application/vnd.github+json',
           },
-        },
-      );
-
-      await this.commentsModel.updateOne(
-        { gh_comment_id: event.commentId },
-        {
-          solutioned: true,
-          suggestion_id: event.suggestionId,
         },
       );
 
