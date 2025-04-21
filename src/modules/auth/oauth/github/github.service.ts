@@ -18,11 +18,8 @@ export class GithubService {
 
   public async callback(code: string): Promise<string> {
     const accessTokenResponse = await this.accessToken(code);
-    console.log('Token: ' + accessTokenResponse);
     const profile = await this.profile(accessTokenResponse);
-    console.log('Profile: ' + profile);
     const user = await this.userService.findOneByGithubId(String(profile.id));
-    console.log('User: ' + user);
     // const encryptedToken = encryptToken(accessTokenResponse.access_token);
     if (!user) {
       const createUserDto: CreateUserDto = {
@@ -33,6 +30,9 @@ export class GithubService {
         avatar_url: profile.avatar_url,
         encrypted_token: accessTokenResponse,
         created_at: new Date(),
+        llm_id: '',
+        openai_api_key: '',
+        groq_api_key: '',
       };
 
       const createdUser = await this.userService.create(createUserDto);

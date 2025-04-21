@@ -1,7 +1,8 @@
 import { JwtPayload } from '@/modules/auth/jwt/entities/jwt.entity';
-import { Controller, Get, Req } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Req, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { Request } from 'express';
+import { Request, Response } from 'express';
+import { UpdateGithubTokenDto } from './dto/update-token-github.dto';
 import { UsersService } from './users.service';
 
 @ApiTags('Users')
@@ -27,5 +28,22 @@ export class UsersController {
     };
 
     return { profile: userProfile };
+  }
+
+  @Patch('github-token')
+  async updateGithubToken(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() dto: UpdateGithubTokenDto,
+  ) {
+    const user = req?.user as JwtPayload['user'];
+
+    if (!user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    await this.userService.setGithubToken(user.github_id, dto.github_token);
+    return res.status(200).json({
+      message: 'Github token updated successfully',
+    });
   }
 }

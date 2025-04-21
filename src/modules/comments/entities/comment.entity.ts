@@ -59,6 +59,18 @@ export class Comments {
   comment_html_url: string;
 
   @ApiProperty()
+  @Prop({ required: true, type: Number })
+  editAttempts: number;
+
+  @ApiProperty({ enum: ['pull_request', 'issue'] })
+  @Prop({ required: true, type: String, enum: ['pull_request', 'issue'] })
+  parentType: string;
+
+  @ApiProperty()
+  @Prop({ required: true, type: Boolean })
+  needsAttention: boolean;
+
+  @ApiProperty()
   @Prop({ required: true, type: String })
   issue_id: string;
 

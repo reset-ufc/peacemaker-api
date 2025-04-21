@@ -1,7 +1,11 @@
 import { Suggestions } from '@/modules/suggestions/entities/suggestion.entity';
 import { User } from '@/modules/users/entities/user.entity';
 import { HttpService } from '@nestjs/axios';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, PipelineStage } from 'mongoose';
@@ -27,6 +31,7 @@ export class CommentsService {
       {
         $match: {
           gh_comment_sender_id: userId,
+          //solutioned: false,
         },
       },
       {
@@ -158,23 +163,39 @@ export class CommentsService {
     const comment = await this.findOne(commentId, userGithubId);
 
     if (!comment) {
+      console.warn('Comment not found for id:', commentId);
       return null;
     }
 
     const user = await this.userModel.findOne({ gh_user_id: userGithubId });
 
     if (!user) {
+      console.warn('User not found for GitHub ID:', userGithubId);
       return null;
     }
 
-    console.log(user);
+    if (!user.encrypted_token) {
+      throw new BadRequestException(
+        'Por favor, configure seu GitHub token antes de aceitar sugestões.',
+      );
+    }
 
-    const suggestionDoc = await this.suggestionsModel.findOne({
-      gh_comment_id: commentId,
-      _id: suggestionId,
-    });
+    const suggestionDoc = await this.suggestionsModel.findOneAndUpdate(
+      {
+        gh_comment_id: commentId,
+        _id: suggestionId,
+      },
+      {
+        content: acceptCommentSuggestionDto.suggestion_content,
+        is_edited: acceptCommentSuggestionDto.is_edited,
+      },
+      {
+        new: true,
+      },
+    );
 
     if (!suggestionDoc) {
+      console.warn('Suggestion not found for id:', suggestionId);
       return null;
     }
 
@@ -206,19 +227,10 @@ export class CommentsService {
         },
       );
 
-      await this.commentsModel.updateOne(
-        { gh_comment_id: event.commentId },
-        {
-          solutioned: true,
-          suggestion_id: event.suggestionId,
-        },
-      );
-
       const responseData = response.data;
-
       return responseData;
     } catch (error) {
-      console.error(error);
+      console.error('Error in commentEdit:', error);
       throw new InternalServerErrorException(
         `Failed to update comment: ${error.message}`,
       );
