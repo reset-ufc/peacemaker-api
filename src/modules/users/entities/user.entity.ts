@@ -44,7 +44,7 @@ export class User {
 
   // Defaults to Model.LLAMA_3_3_70B_VERSATILE
   @ApiProperty()
-  @Prop({ required: true, default: Model.LLAMA_3_3_70B_VERSATILE })
+  @Prop({ required: false, default: Model.LLAMA_3_3_70B_VERSATILE })
   llm_id: string;
 
   @ApiProperty()
