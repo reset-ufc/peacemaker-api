@@ -31,7 +31,6 @@ export class CommentsService {
       {
         $match: {
           gh_comment_sender_id: userId,
-          //solutioned: false,
         },
       },
       {
@@ -65,6 +64,11 @@ export class CommentsService {
               cond: { $eq: ['$$suggestion.is_rejected', false] },
             },
           },
+        },
+      },
+      {
+        $sort: {
+          created_at: -1, // Sort by createdAt field in descending order (newest first)
         },
       },
     ];
@@ -192,6 +196,12 @@ export class CommentsService {
       {
         new: true,
       },
+    );
+
+    console.log(
+      'Suggestion document:',
+      JSON.stringify(suggestionDoc) + ' suggestionId: ',
+      suggestionId,
     );
 
     if (!suggestionDoc) {
