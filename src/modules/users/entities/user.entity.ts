@@ -39,7 +39,7 @@ export class User {
   avatar_url?: string;
 
   @ApiProperty()
-  @Prop({ required: true })
+  @Prop({ required: false })
   encrypted_token: string;
 
   // Defaults to Model.LLAMA_3_3_70B_VERSATILE
