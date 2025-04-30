@@ -1,6 +1,7 @@
 // src/dashboard/dashboard.controller.ts
-import { Controller, Get, HttpStatus, Query, Res } from '@nestjs/common';
-import { Response } from 'express';
+import { Controller, Get, HttpStatus, Query, Req, Res } from '@nestjs/common';
+import { Request, Response } from 'express';
+import { JwtPayload } from '../auth/jwt/entities/jwt.entity';
 import { DashboardService } from './dashboard.service';
 
 @Controller('dashboard')
@@ -12,12 +13,15 @@ export class DashboardController {
     @Query('period') period: string, // '24h', '7d', '30d' ou '1y'
     @Query('repo') repo: string, // opcional, por exemplo, o id do repositório
     @Res() response: Response,
+    @Req() request: Request,
   ) {
+    const user = request?.user as JwtPayload['user'];
     try {
       const selectedPeriod = period || '24h';
       const data = await this.dashboardService.getDashboardData(
         selectedPeriod,
         repo,
+        user.github_id,
       );
       return response.status(HttpStatus.OK).json(data);
     } catch (error) {
@@ -32,12 +36,15 @@ export class DashboardController {
     @Query('period') period: string,
     @Query('repo') repo: string,
     @Res() response: Response,
+    @Req() request: Request,
   ) {
+    const user = request?.user as JwtPayload['user'];
     try {
       const selectedPeriod = period || '24h';
       const data = await this.dashboardService.getOverviewMetrics(
         selectedPeriod,
         repo,
+        user.github_id,
       );
       return response.status(HttpStatus.OK).json(data);
     } catch (error) {
@@ -51,8 +58,10 @@ export class DashboardController {
   async getModerationActivity(
     @Query('period') period: string,
     @Query('repo') repo: string,
+    @Req() request: Request,
     @Res() response: Response,
   ) {
+    const user = request?.user as JwtPayload['user'];
     try {
       const selectedPeriod = period || '24h';
       const startDate =
@@ -60,6 +69,7 @@ export class DashboardController {
       const data = await this.dashboardService.getModerationActivity(
         startDate,
         repo,
+        user.github_id,
       );
       return response.status(HttpStatus.OK).json(data);
     } catch (error) {
@@ -73,8 +83,10 @@ export class DashboardController {
   async getRecentFlagged(
     @Query('period') period: string,
     @Query('repo') repo: string,
+    @Req() request: Request,
     @Res() response: Response,
   ) {
+    const user = request?.user as JwtPayload['user'];
     try {
       const selectedPeriod = period || '24h';
       const startDate =
@@ -82,6 +94,7 @@ export class DashboardController {
       const data = await this.dashboardService.getRecentFlagged(
         startDate,
         repo,
+        user.github_id,
       );
       return response.status(HttpStatus.OK).json(data);
     } catch (error) {
@@ -95,13 +108,19 @@ export class DashboardController {
   async getRadarFlags(
     @Query('period') period: string,
     @Query('repo') repo: string,
+    @Req() request: Request,
     @Res() response: Response,
   ) {
+    const user = request?.user as JwtPayload['user'];
     try {
       const selectedPeriod = period || '24h';
       const startDate =
         this.dashboardService.calculateStartDate(selectedPeriod);
-      const data = await this.dashboardService.getRadarFlags(startDate, repo);
+      const data = await this.dashboardService.getRadarFlags(
+        startDate,
+        repo,
+        user.github_id,
+      );
       return response.status(HttpStatus.OK).json(data);
     } catch (error) {
       return response
@@ -114,8 +133,10 @@ export class DashboardController {
   async getModerationActions(
     @Query('period') period: string,
     @Query('repo') repo: string,
+    @Req() request: Request,
     @Res() response: Response,
   ) {
+    const user = request?.user as JwtPayload['user'];
     try {
       const selectedPeriod = period || '24h';
       const startDate =
@@ -123,6 +144,7 @@ export class DashboardController {
       const data = await this.dashboardService.getModerationActions(
         startDate,
         repo,
+        user.github_id,
       );
       return response.status(HttpStatus.OK).json(data);
     } catch (error) {
@@ -137,14 +159,17 @@ export class DashboardController {
     @Query('period') period: string,
     @Query('repo') repo: string,
     @Query('type') type: string,
+    @Req() request: Request,
     @Res() response: Response,
   ) {
+    const user = request?.user as JwtPayload['user'];
     try {
       const selectedPeriod = period || '24h';
       const data = await this.dashboardService.getIncivilityByType(
         selectedPeriod,
         type,
         repo,
+        user.github_id,
       );
       return response.status(HttpStatus.OK).json(data);
     } catch (error) {

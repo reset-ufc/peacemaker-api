@@ -34,17 +34,36 @@ export class DashboardService {
     return new Date(Date.now() - periodMs);
   }
 
-  private buildFilter(startDate: Date, repo?: string): Record<string, any> {
-    const filter: any = { created_at: { $gte: startDate } };
+  private buildFilter(
+    startDate: Date,
+    repo?: string,
+    userId?: string,
+  ): Record<string, any> {
+    const filter: Record<string, any> = { created_at: { $gte: startDate } };
     if (repo && repo !== 'all') {
       filter.gh_repository_id = repo;
+    }
+    if (userId) {
+      filter.gh_comment_sender_id = userId;
     }
     return filter;
   }
 
-  async getOverviewMetrics(period: string, repo?: string): Promise<any> {
+  async getOverviewMetrics(
+    period: string,
+    repo?: string,
+    userId?: string,
+  ): Promise<{
+    averageCommentScore: number;
+    medianCommentScore: number;
+    totalComments: number;
+    resolvedComments: number;
+    flaggedComments: number;
+    acceptedSuggestionsCount: number;
+    refusedSuggestions: number;
+  }> {
     const startDate = this.calculateStartDate(period);
-    const filter: Record<string, any> = this.buildFilter(startDate, repo);
+    const filter = this.buildFilter(startDate, repo, userId);
 
     const totalComments = await this.commentsModel.countDocuments(filter);
     const flaggedComments = await this.commentsModel.countDocuments({
@@ -68,7 +87,7 @@ export class DashboardService {
       medianCommentScore,
       averageCommentScore,
     }: { medianCommentScore: number; averageCommentScore: number } =
-      await this.getCommentScores(startDate, repo);
+      await this.getCommentScores(startDate, repo, userId);
 
     return {
       averageCommentScore: averageCommentScore,
@@ -81,8 +100,12 @@ export class DashboardService {
     };
   }
 
-  private async getCommentScores(startDate: Date, repo?: string) {
-    const filter = this.buildFilter(startDate, repo);
+  private async getCommentScores(
+    startDate: Date,
+    repo?: string,
+    userId?: string,
+  ) {
+    const filter = this.buildFilter(startDate, repo, userId);
 
     const averageScoreAgg = await this.commentsModel.aggregate([
       { $match: filter },
@@ -116,8 +139,12 @@ export class DashboardService {
     };
   }
 
-  async getModerationActivity(startDate: Date, repo?: string): Promise<any[]> {
-    const filter = this.buildFilter(startDate, repo);
+  async getModerationActivity(
+    startDate: Date,
+    repo?: string,
+    userId?: string,
+  ): Promise<any[]> {
+    const filter = this.buildFilter(startDate, repo, userId);
     const moderationActivityAgg = await this.commentsModel.aggregate([
       { $match: filter },
       {
@@ -140,8 +167,12 @@ export class DashboardService {
     );
   }
 
-  async getRecentFlagged(startDate: Date, repo?: string): Promise<any[]> {
-    const filter = this.buildFilter(startDate, repo);
+  async getRecentFlagged(
+    startDate: Date,
+    repo?: string,
+    userId?: string,
+  ): Promise<any[]> {
+    const filter = this.buildFilter(startDate, repo, userId);
     const recentFlaggedDocs = await this.commentsModel
       .find({ ...filter, toxicity_score: { $gte: 0.6 } })
       .sort({ created_at: -1 })
@@ -158,8 +189,12 @@ export class DashboardService {
     });
   }
 
-  async getRadarFlags(startDate: Date, repo?: string): Promise<any[]> {
-    const filter = this.buildFilter(startDate, repo);
+  async getRadarFlags(
+    startDate: Date,
+    repo?: string,
+    userId?: string,
+  ): Promise<any[]> {
+    const filter = this.buildFilter(startDate, repo, userId);
     const classificationDataAgg = await this.commentsModel.aggregate([
       { $match: filter },
       { $group: { _id: '$classification', total: { $sum: 1 } } },
@@ -171,8 +206,12 @@ export class DashboardService {
     }));
   }
 
-  async getModerationActions(startDate: Date, repo?: string): Promise<any> {
-    const filter = this.buildFilter(startDate, repo);
+  async getModerationActions(
+    startDate: Date,
+    repo?: string,
+    userId?: string,
+  ): Promise<any> {
+    const filter = this.buildFilter(startDate, repo, userId);
     const accepted = await this.commentsModel.countDocuments({
       ...filter,
       solutioned: true,
@@ -192,9 +231,13 @@ export class DashboardService {
     };
   }
 
-  async getDashboardData(period: string = '24h', repo?: string) {
+  async getDashboardData(
+    period: string = '24h',
+    repo?: string,
+    userId?: string,
+  ) {
     const startDate = this.calculateStartDate(period);
-    const filter = this.buildFilter(startDate, repo);
+    const filter = this.buildFilter(startDate, repo, userId);
 
     const totalComments = await this.commentsModel.countDocuments(filter);
     const flaggedComments = await this.commentsModel.countDocuments({
@@ -215,10 +258,14 @@ export class DashboardService {
       is_resolved: true,
     });
     const { medianCommentScore, averageCommentScore } =
-      await this.getCommentScores(startDate, repo);
-    const recentFlagged = await this.getRecentFlagged(startDate, repo);
-    const radarFlags = await this.getRadarFlags(startDate, repo);
-    const moderationActions = await this.getModerationActions(startDate, repo);
+      await this.getCommentScores(startDate, repo, userId);
+    const recentFlagged = await this.getRecentFlagged(startDate, repo, userId);
+    const radarFlags = await this.getRadarFlags(startDate, repo, userId);
+    const moderationActions = await this.getModerationActions(
+      startDate,
+      repo,
+      userId,
+    );
 
     return {
       averageCommentScore,
@@ -238,9 +285,10 @@ export class DashboardService {
     period: string,
     type: string,
     repo?: string,
+    userId?: string,
   ): Promise<any[]> {
     const startDate = this.calculateStartDate(period);
-    const filter = this.buildFilter(startDate, repo);
+    const filter = this.buildFilter(startDate, repo, userId);
     filter['parentType'] = type;
 
     const incivilityAgg = await this.commentsModel.aggregate([
