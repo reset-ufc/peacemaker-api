@@ -27,6 +27,13 @@ export class UsersService {
     return userCreated;
   }
 
+  async setThreshold(gh_user_id: string, threshold: number) {
+    const user = await this.userModel.findOne({ gh_user_id });
+    if (!user) throw new NotFoundException('User not found');
+    user.threshold = threshold;
+    await user.save();
+  }
+
   async setGithubToken(gh_user_id: string, token: string) {
     const user = await this.userModel.findOne({ gh_user_id });
     if (!user) throw new NotFoundException('User not found');

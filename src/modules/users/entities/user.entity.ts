@@ -39,6 +39,10 @@ export class User {
   avatar_url?: string;
 
   @ApiProperty()
+  @Prop({ required: false, default: 0.6 })
+  threshold?: number;
+
+  @ApiProperty()
   @Prop({ required: false })
   encrypted_token: string;
 
