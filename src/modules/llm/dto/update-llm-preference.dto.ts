@@ -1,9 +1,8 @@
-import { Model as LlmModel } from '@/enums/models';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class UpdateLlmPreferenceDto {
-  @IsEnum(LlmModel)
-  llm_id: LlmModel;
+  @IsString()
+  llm_id: string;
 
   @IsOptional()
   @IsString()

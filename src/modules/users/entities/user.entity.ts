@@ -1,4 +1,3 @@
-import { Model } from '@/enums/models';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { Document } from 'mongoose';
@@ -42,9 +41,8 @@ export class User {
   @Prop({ required: true })
   encrypted_token: string;
 
-  // Defaults to Model.LLAMA_3_3_70B_VERSATILE
   @ApiProperty()
-  @Prop({ required: true, default: Model.LLAMA_3_3_70B_VERSATILE })
+  @Prop({ required: true, default: "llama_3_3_70b_versatile" })
   llm_id: string;
 
   @ApiProperty()
