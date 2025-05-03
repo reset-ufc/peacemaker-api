@@ -46,6 +46,10 @@ export class User {
   @Prop({ required: false })
   encrypted_token: string;
 
+  @ApiProperty()
+  @Prop({ required: false })
+  github_token_automatically_generated: string;
+
   // Defaults to Model.LLAMA_3_3_70B_VERSATILE
   @ApiProperty()
   @Prop({ required: false, default: Model.LLAMA_3_3_70B_VERSATILE })

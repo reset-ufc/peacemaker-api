@@ -20,6 +20,10 @@ export class CreateUserDto extends User {
   avatar_url?: string;
 
   @IsOptional()
+  @IsString()
+  github_token_automatically_generated: string;
+
+  @IsOptional()
   @IsString({ message: 'The Githubtoken is required' })
   encrypted_token: string;
 

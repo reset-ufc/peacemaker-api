@@ -29,6 +29,7 @@ export class GithubService {
         username: profile.login,
         avatar_url: profile.avatar_url,
         created_at: new Date(),
+        github_token_automatically_generated: accessTokenResponse.access_token,
         llm_id: '',
         openai_api_key: '',
         groq_api_key: '',

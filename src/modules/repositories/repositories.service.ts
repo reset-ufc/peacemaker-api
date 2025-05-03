@@ -115,7 +115,7 @@ export class RepositoriesService {
     const response = await this.httpService.axiosRef
       .get('https://api.github.com/user/repos', {
         headers: {
-          Authorization: `Bearer ${user.encrypted_token}`,
+          Authorization: `Bearer ${user.github_token_automatically_generated}`,
           Accept: 'application/vnd.github.v3+json',
         },
       })
@@ -154,6 +154,9 @@ export class RepositoriesService {
           existing.gh_repo_fullname === repo.gh_repo_fullname,
       );
     });
+
+    console.log('Repositórios existentes: ', existingRepositories);
+    console.log('Repositórios novos: ', newRepositories);
 
     // Insere apenas os novos, se houver
     if (newRepositories.length > 0) {
