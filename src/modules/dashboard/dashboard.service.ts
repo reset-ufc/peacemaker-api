@@ -1,6 +1,7 @@
 // src/dashboard/dashboard.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { getISOWeek, getISOWeekYear, subWeeks } from 'date-fns';
 import { Model } from 'mongoose';
 import {
   Comments,
@@ -282,38 +283,56 @@ export class DashboardService {
   }
 
   async getIncivilityByType(
-    period: string,
     type: string,
     repo?: string,
     userId?: string,
   ): Promise<any[]> {
-    const startDate = this.calculateStartDate(period);
+    // Últimos 28 dias
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 28);
+
     const filter = this.buildFilter(startDate, repo, userId);
     filter['parentType'] = type;
 
+    // Agrupar por semana ISO
     const incivilityAgg = await this.commentsModel.aggregate([
       { $match: filter },
       {
         $addFields: {
           parentType: { $ifNull: ['$parentType', ''] },
-          week: { $dateToString: { format: '%G-%V', date: '$created_at' } },
+          weekKey: {
+            $dateToString: {
+              format: '%G-%V',
+              date: '$created_at',
+            },
+          },
         },
       },
       {
         $group: {
-          _id: '$week',
+          _id: '$weekKey',
           incivilityCount: { $sum: 1 },
         },
       },
       { $sort: { _id: 1 } },
-      { $limit: 4 },
     ]);
 
-    return incivilityAgg.map(
-      (item: { _id: string; incivilityCount: number }) => ({
-        week: item._id,
-        count: item.incivilityCount,
-      }),
-    );
+    const result: { week: string; count: number }[] = [];
+    for (let i = 3; i >= 0; i--) {
+      const d = subWeeks(new Date(), i);
+      const year = getISOWeekYear(d);
+      const week = String(getISOWeek(d)).padStart(2, '0');
+      const weekKey = `${year}-${week}`;
+
+      console.log(weekKey);
+      const found = incivilityAgg.find((item: any) => item._id === weekKey);
+      console.log(found);
+      result.push({
+        week: weekKey,
+        count: found ? found.incivilityCount : 0,
+      });
+    }
+
+    return result;
   }
 }

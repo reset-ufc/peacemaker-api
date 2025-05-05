@@ -156,7 +156,6 @@ export class DashboardController {
 
   @Get('incivilities-by-type')
   async getIncivilityByType(
-    @Query('period') period: string,
     @Query('repo') repo: string,
     @Query('type') type: string,
     @Req() request: Request,
@@ -164,9 +163,7 @@ export class DashboardController {
   ) {
     const user = request?.user as JwtPayload['user'];
     try {
-      const selectedPeriod = period || '24h';
       const data = await this.dashboardService.getIncivilityByType(
-        selectedPeriod,
         type,
         repo,
         user.github_id,
