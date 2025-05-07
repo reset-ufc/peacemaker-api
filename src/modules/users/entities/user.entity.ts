@@ -39,7 +39,7 @@ export class User {
   avatar_url?: string;
 
   @ApiProperty()
-  @Prop({ required: false, default: 0.6 })
+  @Prop({ required: false, default: 0.5 })
   threshold?: number;
 
   @ApiProperty()
