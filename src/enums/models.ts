@@ -43,7 +43,7 @@ export const modelProviderMap: Record<Model, ModelProvider> = {
   [Model.GPT_3_5_TURBO_0613]: ModelProvider.OPENAI,
   [Model.GPT_3_5_TURBO_1106]: ModelProvider.OPENAI,
   [Model.GPT_3_5_TURBO_0125]: ModelProvider.OPENAI,
-}
+};
 
 // 🔠 Limite de contexto
 export const contextWindowMap: Partial<Record<Model, number>> = {
@@ -53,10 +53,10 @@ export const contextWindowMap: Partial<Record<Model, number>> = {
   [Model.LLAMA_3_70B_8192]: 8_192,
   [Model.LLAMA_3_8B_8192]: 8_192,
   [Model.GEMMA2_9B_IT]: 8_192,
-}
+};
 
 // 🔢 Limite de tokens de geração
 export const maxCompletionTokensMap: Partial<Record<Model, number>> = {
   [Model.LLAMA_3_3_70B_VERSATILE]: 32_768,
   [Model.LLAMA_3_1_8B_INSTANT]: 8_192,
-}
+};

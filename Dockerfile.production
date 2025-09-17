@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:1
 
-ARG NODE_VERSION=20.19.0
+ARG NODE_VERSION=22.19.0
 
 # Base stage with shared configurations
 FROM node:${NODE_VERSION}-slim AS base
@@ -34,7 +34,9 @@ ENV NEST_API_PORT=${NEST_API_PORT} \
     GITHUB_OAUTH_CALLBACK_URL=${GITHUB_OAUTH_CALLBACK_URL} \
     GITHUB_OAUTH_SCOPE=${GITHUB_OAUTH_SCOPE}
 
-RUN pnpm run build
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm run build
+# Prune devDependencies to ship only production deps
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm prune --prod
 
 # Production stage
 FROM base AS production
